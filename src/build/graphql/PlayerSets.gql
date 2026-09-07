@@ -1,0 +1,40 @@
+query UserSets($id: ID!, $page: Int){
+  player(id: $id) {
+    sets(perPage: 40, page: $page, filters: {}) {
+      pageInfo {
+        totalPages
+      }
+      nodes {
+        event {
+          slug
+          name
+          tournament {
+            name
+          }
+          videogame {
+            name
+            id
+          }
+        }
+        completedAt
+        fullRoundText
+        slots {
+          entrant {
+            participants {
+              player {
+                id
+              }
+            }
+          }
+          standing {
+            stats {
+              score {
+                value
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

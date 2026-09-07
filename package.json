@@ -1,0 +1,25 @@
+{
+  "name": "tournament-overlay-server",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://gitlab.com/TwilCynder/tournament-overlay-server#readme",
+  "bugs": {
+    "url": "https://gitlab.com/TwilCynder/tournament-overlay-server/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/TwilCynder/tournament-overlay-server.git"
+  },
+  "license": "ISC",
+  "author": "TwilCynder",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "bash ./launch.sh build"
+  },
+  "dependencies": {
+    "@twilcynder/arguments-parser": "^1.20.5",
+    "startgg-helper-node": "^2.5.0"
+  }
+}

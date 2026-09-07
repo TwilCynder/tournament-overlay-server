@@ -1,0 +1,11 @@
+query UserInfo($slug: String!){
+  user(slug: $slug){
+    player {
+      sets(perPage: 40, filters: {}) {
+        pageInfo {
+          totalPages
+        }
+      }
+    }
+  }
+}
