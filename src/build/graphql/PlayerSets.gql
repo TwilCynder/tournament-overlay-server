@@ -1,6 +1,6 @@
 query UserSets($id: ID!, $page: Int){
   player(id: $id) {
-    sets(perPage: 40, page: $page, filters: {}) {
+    sets(perPage: 35, page: $page, filters: {}) {
       pageInfo {
         totalPages
       }

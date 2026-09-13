@@ -5,6 +5,10 @@ query EventStandingsQuery($slug: String!) {
     tournament {
       name
     }
+    videogame {
+      name
+      id
+    }
     entrants(query: {perPage: 192}) {
       nodes {
         name

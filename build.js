@@ -1,15 +1,9 @@
-import { extractSlug } from "startgg-helper-node";
-import { StartGGDelayQueryLimiter } from "startgg-helper";
-import { loadFromSGGAP } from "./src/build/util/SGGAP.js";
-import { checkEnvironementVariables } from "./src/build/util/scriptUtil.js";
 import { error } from "./src/build/util/error.js";
 import { ArgumentsManager } from "@twilcynder/arguments-parser";
 import { joinPath, readJSON } from "./src/build/util/io.js";
-import { createClientAuto } from "./src/build/util/client.js";
-import { getEventPlayersFactory } from "./src/build/getEventEntrants.js";
-import { QueryManager } from "./src/build/util/queryManager.js";
-import { getPlayersDataFactory } from "./src/build/playerData.js";
-import { buildMatchesMatrix } from "./src/build/head2headMatrix.js";
+import fs from "fs/promises";
+import { extractSlug } from "./src/build/util/startggUtil.js";
+import { build } from "./src/build.js";
 
 let {event, sggog_addr, sggog_addr_default} = new ArgumentsManager()
     .setParameters({guessLowDashes: true})
@@ -20,14 +14,6 @@ let {event, sggog_addr, sggog_addr_default} = new ArgumentsManager()
     .parseProcessArguments()
 
 sggog_addr = sggog_addr ?? sggog_addr_default ? "localhost:54301" : null;
-
-const qm = new QueryManager;
-const [client, getPlayers, getPlayersData] = await Promise.all([
-    createClientAuto(sggog_addr), 
-    getEventPlayersFactory(qm),
-    getPlayersDataFactory(qm)]
-);
-const limiter = new StartGGDelayQueryLimiter;
 
 if (!event){
     console.log("Loading event slug from TSH user settings ...")
@@ -42,21 +28,16 @@ if (!event){
         error(4, "No event specified or selected in TSH");
     }
 }
-event = extractSlug(event);
 
-console.log("Loading entrants for event", event);
-
-const players = await getPlayers(client, event, limiter).catch(err => error(6, err));
-for (const entrant of players){
-    console.log("-", entrant.gamerTag);
+let tournamentFilename, eventFilename;
+try {
+    [event, tournamentFilename, eventFilename] = extractSlug(event);
+} catch (err) {
+    error(2, err.message)
 }
 
-const players_ = players.slice(0, 4);
-const playersData = await getPlayersData(client, players_, limiter);
+const {matrix, playersData} = await build(event, sggog_addr);
 
-limiter.stop();
-
-const matrix = buildMatchesMatrix(playersData, {});
 for (const playerData of playersData){
     console.log("Head2Heads for", playerData.player.gamerTag, `(${playerData.player.id})`);
     for (const [id, h2h] of Object.entries(matrix[playerData.player.id])){
@@ -66,3 +47,6 @@ for (const playerData of playersData){
         }
     }
 }
+
+await fs.mkdir("out", {recursive: true});
+await fs.writeFile("out/" + tournamentFilename + "-" + eventFilename + ".json", JSON.stringify(matrix));

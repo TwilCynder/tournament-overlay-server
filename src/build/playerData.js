@@ -7,8 +7,14 @@ export async function getPlayersDataFactory(queryManager = new QueryManager){
     /** 
      * @param {import("graphql-request").GraphQLClient} client @param {{}[]} players @param {import("startgg-helper-node").TimedQuerySemaphore} limiter 
      */
-    return function getPlayersData(client, players, limiter){
-        return Promise.all(players.map(async player => {
+    return async function getPlayersData(client, players, limiter){
+        let result = [];
+        for (const player of players){
+            result.push({player, sets: await getPlayerSets(client, player.id, limiter)});
+        }
+        return result;
+
+        return await Promise.all(players.map(async player => {
             const sets = await getPlayerSets(client, player.id, limiter);
             return {player, sets}
         }))
