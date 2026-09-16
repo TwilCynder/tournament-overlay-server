@@ -1,6 +1,6 @@
 import { createClient } from "startgg-helper-node";
-import { error } from "./error.js";
-import { FormattableError, NoCauseFormattableError } from "./error.js";
+import { error } from "../../common/error.js";
+import { FormattableError, NoCauseFormattableError } from "../../common/error.js";
 
 /** @param {string | number} url  */
 function buildURL(url){

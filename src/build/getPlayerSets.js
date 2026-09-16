@@ -1,4 +1,4 @@
-import { FormattableError } from "./util/error.js";
+import { FormattableError } from "../common/error.js";
 import { QueryManager } from "./util/queryManager.js";
 
 export async function getPlayersSetsFactory(queryManager = new QueryManager){

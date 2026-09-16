@@ -6,12 +6,11 @@ import { getPlayersDataFactory } from "./build/playerData.js";
 import { buildMatchesMatrix } from "./build/head2headMatrix.js";
 
 /**
- * 
+ * TODO : callbacks
  * @param {string} event Event slug
  * @param {Object} config 
  * @param {string} config.sggog_addr Address for SGGOG
  * @param {boolean} config.silentQueries 
- * @param {{onTotal: (total: number) => void}}
  */
 export async function build(event, config){
     const qm = new QueryManager;

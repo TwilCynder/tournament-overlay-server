@@ -2,8 +2,9 @@ import { error } from "./src/build/util/error.js";
 import { ArgumentsManager } from "@twilcynder/arguments-parser";
 import { joinPath, readJSON } from "./src/build/util/io.js";
 import fs from "fs/promises";
-import { extractSlug } from "./src/build/util/startggUtil.js";
+
 import { build } from "./src/build.js";
+import { extractSlug, getSlugAndFilename } from "./src/common/slug.js";
 
 let {event, sggog_addr, sggog_addr_default} = new ArgumentsManager()
     .setParameters({guessLowDashes: true})
@@ -29,18 +30,18 @@ if (!event){
     }
 }
 
-let tournamentFilename, eventFilename;
+let filename;
 try {
-    [event, tournamentFilename, eventFilename] = extractSlug(event);
+    [event, filename] = getSlugAndFilename(event);
 } catch (err) {
     error(2, err.message)
 }
 
-const {matrix, playersData} = await build(event, sggog_addr);
+const {matrix, players} = await build(event, {sggog_addr});
 
-for (const playerData of playersData){
-    console.log("Head2Heads for", playerData.player.gamerTag, `(${playerData.player.id})`);
-    for (const [id, h2h] of Object.entries(matrix[playerData.player.id])){
+for (const playerData of players){
+    console.log("Head2Heads for", playerData.gamerTag, `(${playerData.id})`);
+    for (const [id, h2h] of Object.entries(matrix[playerData.id])){
         console.log("- H2H against", id);
         for (const set of h2h){
             console.log("- - -", set.event.tournament.name, "-", set.event.name, "- (" + set.event.videogame.name + ") -", set.fullRoundText);
@@ -49,4 +50,4 @@ for (const playerData of playersData){
 }
 
 await fs.mkdir("out", {recursive: true});
-await fs.writeFile("out/" + tournamentFilename + "-" + eventFilename + ".json", JSON.stringify(matrix));
+await fs.writeFile(filename, JSON.stringify(matrix));
