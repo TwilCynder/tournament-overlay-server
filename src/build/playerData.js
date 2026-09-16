@@ -5,7 +5,7 @@ export async function getPlayersDataFactory(queryManager = new QueryManager){
     const getPlayerSets = await getPlayersSetsFactory(queryManager);
 
     /** 
-     * @param {import("graphql-request").GraphQLClient} client @param {{}[]} players @param {import("startgg-helper-node").TimedQuerySemaphore} limiter 
+     * @param {import("graphql-request").GraphQLClient} client @param {import("../common/types").PlayerObject[]} players @param {import("startgg-helper-node").TimedQuerySemaphore} limiter 
      */
     return async function getPlayersData(client, players, limiter){
         let result = [];

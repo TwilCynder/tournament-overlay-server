@@ -5,7 +5,10 @@ import { QueryManager } from "./util/queryManager.js";
 export async function getEventInfoFactory(queryManager = new QueryManager){
     const query = await queryManager.try("eventEntrants", new URL("./graphql/EventEntrants.gql", import.meta.url));
 
-    /** @param {any} client @param {string} slug @param {import("startgg-helper-node").TimedQuerySemaphore} limiter*/
+    /** 
+     * @param {any} client @param {string} slug @param {import("startgg-helper-node").TimedQuerySemaphore} limiter
+     * @returns {Promise<{event: any, players: import("../common/types").PlayerObject[]}>}
+    */
     return async function getEventInfo(client, slug, limiter){
         try {
             const data = await query.execute(client, {slug}, limiter);

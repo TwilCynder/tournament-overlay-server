@@ -18,7 +18,6 @@ function isEventFiltered(filters, set){
  * 
  * @param {Awaited<ReturnType<Awaited<ReturnType<import("./playerData.js").getPlayersDataFactory>>>>} playersList 
  * @param {Filters?} eventFilters 
- * @returns 
  */
 export function buildMatchesMatrix(playersList, eventFilters){
     let indexes = playersList.reduce((prev, current, index) => {
@@ -67,6 +66,7 @@ export function buildMatchesMatrix(playersList, eventFilters){
 
     console.log(matrix);
 
+    /** @type {import("../common/types").h2hMatrix} */
     let hashMatrix = playersList.reduce((prev, current) => {
         prev[current.player.id] = {};
         return prev;

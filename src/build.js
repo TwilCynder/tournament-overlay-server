@@ -8,13 +8,15 @@ import { buildMatchesMatrix } from "./build/head2headMatrix.js";
 /**
  * 
  * @param {string} event Event slug
- * @param {string} sggog_addr Address for SGGOG
- * @returns 
+ * @param {Object} config 
+ * @param {string} config.sggog_addr Address for SGGOG
+ * @param {boolean} config.silentQueries 
+ * @param {{onTotal: (total: number) => void}}
  */
-export async function build(event, sggog_addr){
+export async function build(event, config){
     const qm = new QueryManager;
     const [client, getEventInfo, getPlayersData] = await Promise.all([
-        createClientAuto(sggog_addr), 
+        createClientAuto(config.sggog_addr), 
         getEventInfoFactory(qm),
         getPlayersDataFactory(qm)]
     );
@@ -39,7 +41,7 @@ export async function build(event, sggog_addr){
     const matrix = buildMatchesMatrix(playersData, {game: eventData.event.videogame.id});
 
     return {
-        matrix, playersData,
+        matrix, players,
         event
     }
 }
