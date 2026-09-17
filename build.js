@@ -37,7 +37,7 @@ try {
     error(2, err.message)
 }
 
-const {matrix, players} = await build(event, {sggog_addr});
+const {matrix, players} = await build(event, {sggog_addr}).catch(err => error(5, "Error while building the data :", err));
 
 for (const playerData of players){
     console.log("Head2Heads for", playerData.gamerTag, `(${playerData.id})`);

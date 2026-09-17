@@ -1,8 +1,8 @@
-import { NoCauseFormattableError } from "../common/error.js";
+import { LimitedDepthObject, NoCauseFormattableError } from "../common/error.js";
 import { readJSON } from "../build/util/io.js";
 import { findPlayerID } from "./findPlayer.js";
 import { ServerError } from "./serverError.js";
-import { getSlugAndFilename } from "./src/common/slug.js";
+import { getSlugAndFilename } from "../common/slug.js";
 
 export class DataManager {
     /** @type {import("../common/types.js").Data} */
@@ -17,7 +17,7 @@ export class DataManager {
 
         const data = await readJSON(filenename);
 
-        if (!data.event) throw NoCauseFormattableError("Invalid data file (no event field)");
+        if (!data.event) throw NoCauseFormattableError("Invalid data file (no event field) :", new LimitedDepthObject(data, 0));
         if (data.event != slug) throw NoCauseFormattableError("Invalid data filename : wrong event");
 
         this.data = data;

@@ -1,40 +1,58 @@
-export class FormattableError extends Error {    
-    constructor(cause, ...msgParts){
-        if (cause instanceof FormattableError){
-            msgParts.push(":", ...cause.msgParts);
-        } else {
-            msgParts.push(":", cause);
-        }
-        
-        super(msgParts.join(" "), {cause});
-        this.msgParts = msgParts;
+import util from "util"
+
+class FormatValue {
+    constructor(base, formatted){
+        this.base = base; this.formatted = formatted;
     }
 
-    setCause(err){
-        this.cause = err;
-        return this;
+    toString(){
+        return "" + this.base;
+    }
+}
+
+export class LimitedDepthObject extends FormatValue {
+    constructor(obj, depth){
+        super(obj, util.inspect(obj, false, depth, true))
+    }
+}
+
+function formatMsgPart(part){
+    if (typeof part === "string") return part;
+    if (part instanceof FormatValue) return part.formatted;
+    return util.inspect(part, false, null, true);
+}
+
+export class FormattableError extends Error {
+    #fmtMsg;
+    constructor(cause, ...msgParts){
+        super(msgParts.join(" "), {cause});
+        let fmtMsg = msgParts.map(formatMsgPart).join(" ");
+        if (cause instanceof FormattableError) fmtMsg += " : " + cause.fmtMsg;
+        this.#fmtMsg = fmtMsg;
+    }
+
+    toFormatString(){
+        return this.#fmtMsg + "\n" + util.inspect(this);
     }
 }
 
 export function NoCauseFormattableError(...msgParts){
-    return new FormattableError(null, msgParts);
+    return new FormattableError(null, ...msgParts);
 }
 
 /** @param {Error} error  */
-function unpackError(error){
-    if (error instanceof FormattableError){
-        return error.msgParts;
-    }
-    return [error];
+function formatError(error){
+    return (error instanceof FormattableError ? error.toFormatString() : error);
 }
 
-/** @param {Error} error  */
-export function printError(error){
-    console.error(...unpackError(error));
+export function printError(...message){
+    console.error(...(message.map(formatError)));
 }
 
 /** @param {number} code @param {...any} message  */
 export function error(code, ...message){
-    console.error(...(message.map(msg => unpackError(msg)).flat()))
+    printError(...message);
     process.exit(code);
 }
+
+//Notes pour plus tard : le truc de this.#fmtMsg et tout ce qui va avec, c'est l'alternative à une autre solution bcp plus simple à implémnter, où la string formatée serait directement le message de l'erreur. Le problème de cette alternative est qu'on a des caractères (terminal escape) de style dans le message de l'exception et ça je veux éviter, mais c'est peut être pas si grave dont amediter
