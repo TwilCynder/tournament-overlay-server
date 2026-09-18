@@ -1,10 +1,10 @@
-import { error } from "./src/build/util/error.js";
 import { ArgumentsManager } from "@twilcynder/arguments-parser";
 import { joinPath, readJSON } from "./src/build/util/io.js";
 import fs from "fs/promises";
 
 import { build } from "./src/build.js";
-import { extractSlug, getSlugAndFilename } from "./src/common/slug.js";
+import { getSlugAndFilename } from "./src/common/slug.js";
+import { error } from "./src/common/error.js";
 
 let {event, sggog_addr, sggog_addr_default} = new ArgumentsManager()
     .setParameters({guessLowDashes: true})
@@ -37,8 +37,9 @@ try {
     error(2, err.message)
 }
 
-const {matrix, players} = await build(event, {sggog_addr}).catch(err => error(5, "Error while building the data :", err));
+const data = await build(event, {sggog_addr}).catch(err => error(5, "Error while building the data :", err));
 
+const {matrix, players} = data;
 for (const playerData of players){
     console.log("Head2Heads for", playerData.gamerTag, `(${playerData.id})`);
     for (const [id, h2h] of Object.entries(matrix[playerData.id])){
@@ -50,4 +51,4 @@ for (const playerData of players){
 }
 
 await fs.mkdir("out", {recursive: true});
-await fs.writeFile(filename, JSON.stringify(matrix));
+await fs.writeFile(filename, JSON.stringify(data));

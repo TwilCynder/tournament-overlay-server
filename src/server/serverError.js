@@ -1,9 +1,10 @@
 import { FormattableError, printError } from "../common/error.js";
 
 export class ServerError extends FormattableError {
-    constructor(code, userMesssage, ...msg){
+    constructor(code, cause, userMesssage, ...msg){
         if (msg.length == 0) msg[0] = userMesssage;
-        super(...msg);
+        if (cause instanceof ServerError) userMesssage += " : " + cause.userMesssage;
+        super(cause, ...msg);
         this.userMesssage = userMesssage;
         this.code = code;
     }

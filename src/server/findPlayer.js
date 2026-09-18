@@ -1,9 +1,9 @@
-import { NoCauseFormattableError } from "../common/error.js";
+import { fmtS, NoCauseFormattableError } from "../common/error.js";
 import { ServerError } from "./serverError.js";
 
 /**
- * @param {import("./types").PlayerHandle} handle 
- * @param {import("../common/types").PlayerObject[]} players 
+ * @param {import("./types.js").PlayerHandle} handle 
+ * @param {import("../common/types.js").PlayerObject[]} players 
  */
 export function findPlayerID(handle, players){
     if ("id" in handle) return handle.id;
@@ -16,4 +16,9 @@ export function findPlayerID(handle, players){
     }
 
     throw new ServerError(404, "Player not found :", handle.name);
+}
+
+/** @param {import("./types.js").PlayerHandle} player */
+export function playerString(id, player){
+    return ("name" in player) ? `${player.name} (${id})` : "id "+ id;
 }

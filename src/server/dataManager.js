@@ -3,6 +3,7 @@ import { readJSON } from "../build/util/io.js";
 import { findPlayerID } from "./findPlayer.js";
 import { ServerError } from "./serverError.js";
 import { getSlugAndFilename } from "../common/slug.js";
+import { playerString } from "./findPlayer.js";
 
 export class DataManager {
     /** @type {import("../common/types.js").Data} */
@@ -40,7 +41,14 @@ export class DataManager {
         
         if (!matrix) throw new ServerError(404, "H2H data is not included in the data");
 
-        const id1 = findPlayerID(p1);
-        const id2 = findPlayerID(p2);
+        const id1 = findPlayerID(p1, players);
+        const id2 = findPlayerID(p2, players);
+
+        const p1h2h = matrix[id1];
+        if (!p1h2h) throw new ServerError(404, null, "Cannot find H2H data for player" + playerString(id1, p1));
+        const h2h = p1h2h[id2];
+        if (h2h) throw new ServerError(404, null, "Cannot find H2H data for player" + playerString(id2, p2));
+
+        return h2h;
     }
 }

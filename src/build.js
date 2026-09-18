@@ -31,7 +31,7 @@ export async function build(event, config){
     
     console.log("Loading players sets");
 
-    const players = eventData.players//.slice(0, 4);
+    const players = eventData.players//.slice(0, 20);
     const playersData = await getPlayersData(client, players, limiter);
     
     limiter.stop();

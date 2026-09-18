@@ -1,5 +1,17 @@
 import util from "util"
 
+/** @param {string[]} strings */
+export function fmtS(strings, ...values){
+    const res = [];
+    for (let i = 0; i < values.length; i++){
+        res.push(strings[i]);
+        res.push(values[i]);
+    }
+    res.push(strings[values.length]);
+
+    return res;
+}
+
 class FormatValue {
     constructor(base, formatted){
         this.base = base; this.formatted = formatted;
