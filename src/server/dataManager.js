@@ -44,10 +44,12 @@ export class DataManager {
         const id1 = findPlayerID(p1, players);
         const id2 = findPlayerID(p2, players);
 
+        console.log(id1, id2);
+
         const p1h2h = matrix[id1];
-        if (!p1h2h) throw new ServerError(404, null, "Cannot find H2H data for player" + playerString(id1, p1));
+        if (!p1h2h) throw new ServerError(404, null, "Cannot find H2H data for player " + playerString(id1, p1));
         const h2h = p1h2h[id2];
-        if (h2h) throw new ServerError(404, null, "Cannot find H2H data for player" + playerString(id2, p2));
+        if (!h2h) throw new ServerError(404, null, "Cannot find H2H data for player " + playerString(id2, p2));
 
         return h2h;
     }

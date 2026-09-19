@@ -6,7 +6,7 @@ import { ServerError } from "./serverError.js";
  * @param {import("../common/types.js").PlayerObject[]} players 
  */
 export function findPlayerID(handle, players){
-    if ("id" in handle) return handle.id;
+    if ("id" in handle && handle.id) return handle.id;
     else if (!handle.name) throw NoCauseFormattableError("Invalid player handle", handle);
 
     for (const player of players){
@@ -15,7 +15,7 @@ export function findPlayerID(handle, players){
         }
     }
 
-    throw new ServerError(404, "Player not found :", handle.name);
+    throw new ServerError(404, null, "Player not found :", handle.name);
 }
 
 /** @param {import("./types.js").PlayerHandle} player */

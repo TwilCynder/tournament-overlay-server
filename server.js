@@ -4,9 +4,10 @@ import { DataManager } from "./src/server/dataManager.js";
 import express from "express"
 import { dataRouter } from "./src/server/dataServer.js";
 
-let {event} = new ArgumentsManager()
+let {event, port} = new ArgumentsManager()
     .setParameters({guessLowDashes: true})
     .addOption(["-e", "--event"], {description: "URL of the event to load H2H for. Defaults to the one selected in TSH"}, true)
+    .addOption(["-p", "--port"], {description: "Port to listen to", type: "number"})
     .enableHelpParameter()
     .parseProcessArguments()
 
@@ -20,8 +21,36 @@ dm.load("tournament/ledgetrompe-26/event/1v1-ultimate")
 const server = express();
 server.use("/data", dataRouter(dm));
 
-server.listen(5001);
-console.log("Listening on port 5001");
+port = port ?? process.env.PORT ?? 5001;
+server.listen(port);
+console.log("Listening on port", port);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
 console.log(dm.getData());

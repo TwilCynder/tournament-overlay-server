@@ -13,7 +13,7 @@ export class ServerError extends FormattableError {
 /** @param {Error} err  @param {import ("express").Response} res @param {import("express").Request} req  */
 export function handleServerError(err, req, res){
     if (err instanceof ServerError){
-        res.status(err.code).send(err.userMesssage);
+        res.status(err.code).type('txt').send("Error : " + err.userMesssage);
     }
-    printError("Error while processing request", req, err);
+    printError("Error while processing request :", err);
 }
