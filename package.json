@@ -20,6 +20,8 @@
   },
   "dependencies": {
     "@twilcynder/arguments-parser": "^1.20.5",
-    "startgg-helper-node": "^2.5.0"
+    "express": "^5.2.1",
+    "startgg-helper-node": "^2.5.0",
+    "ws": "^8.21.3"
   }
 }
