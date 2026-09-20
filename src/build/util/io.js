@@ -10,3 +10,13 @@ export async function readJSON(path){
     const text = await fs.readFile(path, {encoding: "utf-8"});
     return JSON.parse(text);
 }
+
+
+export function tryReadJSON(path){
+    return readJSON(path).catch(err => {
+        if (err instanceof Error && err.code == "ENOENT"){
+            return null;
+        }
+        throw err;
+    });
+}

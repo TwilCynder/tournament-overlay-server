@@ -1,32 +1,49 @@
 import { LimitedDepthObject, NoCauseFormattableError } from "../common/error.js";
-import { readJSON } from "../build/util/io.js";
+import { readJSON, tryReadJSON } from "../build/util/io.js";
 import { findPlayerID } from "./findPlayer.js";
 import { ServerError } from "./serverError.js";
 import { getSlugAndFilename } from "../common/slug.js";
 import { playerString } from "./findPlayer.js";
+import { getEventFromTSH } from "../common/getSlugFromTSH.js";
+import { EventEmitter } from "events"
 
-export class DataManager {
+export class DataManager extends EventEmitter {
     /** @type {import("../common/types.js").Data} */
-    data;
+    #data;
+    /** @type {string} */
+    #event;
 
     constructor(){
-        this.data = null;
+        super();
+        this.#data = null;
     }
 
-    async load(eventSlug){
-        const [slug, filenename] = getSlugAndFilename(eventSlug);
+    async #load(eventSlug){
+        const eventURL = await getEventFromTSH(eventSlug);
 
-        const data = await readJSON(filenename);
+        const [slug, filenename] = getSlugAndFilename(eventURL);
+        this.#event = eventSlug;
+
+        const data = await tryReadJSON(filenename);
+        if (!data){ //Pas forcément grave, on peut maintenant tenter de build la data (ou retenter de recharger le même fichier)
+            this.#data = null;
+            return false;
+        }
 
         if (!data.event) throw NoCauseFormattableError("Invalid data file (no event field) :", new LimitedDepthObject(data, 0));
         if (data.event != slug) throw NoCauseFormattableError("Invalid data filename : wrong event");
 
-        this.data = data;
+        this.#data = data;
+        return true;
+    }
+
+    load(eventSlug){
+        this.#load(eventSlug).then(result => this.emit("dataLoaded", result));
     }
 
     getData(){
-        if (!this.data) throw new ServerError(500, "Data has not been loaded yet");
-        return this.data;
+        if (!this.#data) throw new ServerError(500, "Data has not been loaded yet");
+        return this.#data;
     }
 
     /**
@@ -43,8 +60,6 @@ export class DataManager {
 
         const id1 = findPlayerID(p1, players);
         const id2 = findPlayerID(p2, players);
-
-        console.log(id1, id2);
 
         const p1h2h = matrix[id1];
         if (!p1h2h) throw new ServerError(404, null, "Cannot find H2H data for player " + playerString(id1, p1));

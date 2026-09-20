@@ -5,6 +5,7 @@ import fs from "fs/promises";
 import { build } from "./src/build.js";
 import { getSlugAndFilename } from "./src/common/slug.js";
 import { error } from "./src/common/error.js";
+import { getEventFromTSH } from "./src/common/getSlugFromTSH.js";
 
 let {event, sggog_addr, sggog_addr_default} = new ArgumentsManager()
     .setParameters({guessLowDashes: true})
@@ -16,19 +17,7 @@ let {event, sggog_addr, sggog_addr_default} = new ArgumentsManager()
 
 sggog_addr = sggog_addr ?? sggog_addr_default ? "localhost:54301" : null;
 
-if (!event){
-    console.log("Loading event slug from TSH user settings ...")
-    if (!process.env.TSH_PATH){
-        error(3, "Trying to load event slug from TSH user settings, but no TSH path has been specified");
-    }
-
-    const tshUserSettings = await readJSON(joinPath(process.env.TSH_PATH, "/user_data/settings.json"));
-    event = tshUserSettings.TOURNAMENT_URL;
-
-    if (!event){
-        error(4, "No event specified or selected in TSH");
-    }
-}
+event = await getEventFromTSH(event).catch(err => error(3, err));
 
 let filename;
 try {

@@ -37,6 +37,11 @@ function formatMsgPart(part){
 export class FormattableError extends Error {
     #fmtMsg;
     constructor(cause, ...msgParts){
+        if (cause && msgParts.length < 1){
+            msgParts.push(cause);
+            cause = null;
+        }
+        
         super(msgParts.join(" "), {cause});
         let fmtMsg = msgParts.map(formatMsgPart).join(" ");
         if (cause instanceof FormattableError) fmtMsg += " : " + cause.fmtMsg;
