@@ -24,6 +24,7 @@ export class DataManager extends EventEmitter {
         const [slug, filenename] = getSlugAndFilename(eventURL);
         this.#event = eventSlug;
 
+        /** @type {import("../common/types.js").Data} */
         const data = await tryReadJSON(filenename);
         if (!data){ //Pas forcément grave, on peut maintenant tenter de build la data (ou retenter de recharger le même fichier)
             this.#data = null;
@@ -34,11 +35,12 @@ export class DataManager extends EventEmitter {
         if (data.event != slug) throw NoCauseFormattableError("Invalid data filename : wrong event");
 
         this.#data = data;
+
         return true;
     }
 
     load(eventSlug){
-        this.#load(eventSlug).then(result => this.emit("dataLoaded", result));
+        this.#load(eventSlug).then(result => this.emit("dataLoaded", result, this.#data));
     }
 
     getData(){
@@ -58,14 +60,17 @@ export class DataManager extends EventEmitter {
         
         if (!matrix) throw new ServerError(404, "H2H data is not included in the data");
 
-        const id1 = findPlayerID(p1, players);
-        const id2 = findPlayerID(p2, players);
+        let id1 = findPlayerID(p1, players);
+        let id2 = findPlayerID(p2, players);
+
+        let inverted;
+        if (id1 > id2) [inverted, id1, id2] = [true, id2, id1];
 
         const p1h2h = matrix[id1];
         if (!p1h2h) throw new ServerError(404, null, "Cannot find H2H data for player " + playerString(id1, p1));
         const h2h = p1h2h[id2];
         if (!h2h) throw new ServerError(404, null, "Cannot find H2H data for player " + playerString(id2, p2));
 
-        return h2h;
+        return {inverted, h2h};
     }
 }

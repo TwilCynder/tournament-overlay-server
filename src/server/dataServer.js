@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { handleServerError, ServerError } from "./serverError.js";
+import { handleServerError } from "./serverError.js";
 
 /** @param {import("express").RequestHandler} f  */
 function handledServerCallback(f){
@@ -17,8 +17,10 @@ export function dataRouter(dataManager){
     const router = Router();
     router.use((_, res, next) => {
         res.type('application/json');
+        res.setHeader("Access-Control-Allow-Origin", "*");
         next();
     });
+
     router.all("/h2h", handledServerCallback((req, res) => {
         const h2h = dataManager.getH2H(
             {id: req.query.p1, name: req.query.p1Name},

@@ -12,8 +12,8 @@ let {event, load, port} = new ArgumentsManager()
     .parseProcessArguments()
 
 const dm = new DataManager();
-dm.on("dataLoaded", (success) => {
-    console.log("Success :", success);
+dm.on("dataLoaded", (success, data) => {
+    if (success) console.log("Successfully loaded data for event", data.event, "with", data.players.length, "players");
 })
 
 if (event || load){

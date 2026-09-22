@@ -14,6 +14,8 @@ export class ServerError extends FormattableError {
 export function handleServerError(err, req, res){
     if (err instanceof ServerError){
         res.status(err.code).type('txt').send("Error : " + err.userMesssage);
+    } else {
+        res.status(500).type('txt').send("Internal error");
     }
     printError("Error while processing request :", err);
 }

@@ -24,6 +24,8 @@ function deep_get_or_else(obj, ...path){
 
 function processSet(startggSet){
     try {
+        if (!startggSet.slots || startggSet.slots.lenth != 2) throw new SkipSetSentinel;
+
         let winner = null;
         const slots = startggSet.slots.map((slot, i) => {
             const entrant = deep_get_or_else(slot, "entrant");
@@ -44,11 +46,12 @@ function processSet(startggSet){
             event: deep_get_or_else(startggSet, "event"),
             fullRoundText: deep_get_or_else(startggSet, "fullRoundText"),
             completedAt: deep_get_or_else(startggSet, "completedAt"),
-            slots
+            slots,
+            winner
         }
     } catch (err){
         if (err instanceof SetValidityError){
-            console.error("Invalid set (dropping it) : nothing at path", err.msg, "in obj", JSON.stringify(err.obj), " | Set object :", util.inspect(startggSet, false, null, true));
+            console.error("Invalid set (dropping it) : ", err.msg, "in obj", JSON.stringify(err.obj), " | Set object :", util.inspect(startggSet, false, null, true));
         } else if (!(err instanceof SkipSetSentinel)){
             throw err;
         }
