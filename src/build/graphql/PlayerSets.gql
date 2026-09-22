@@ -1,6 +1,6 @@
 query UserSets($id: ID!, $page: Int){
   player(id: $id) {
-    sets(perPage: 35, page: $page, filters: {}) {
+    sets(perPage: 32, page: $page, filters: {}) {
       pageInfo {
         totalPages
       }
@@ -12,7 +12,6 @@ query UserSets($id: ID!, $page: Int){
             name
           }
           videogame {
-            name
             id
           }
         }
@@ -20,6 +19,7 @@ query UserSets($id: ID!, $page: Int){
         fullRoundText
         slots {
           entrant {
+            isDisqualified
             participants {
               player {
                 id
@@ -27,6 +27,7 @@ query UserSets($id: ID!, $page: Int){
             }
           }
           standing {
+            placement
             stats {
               score {
                 value

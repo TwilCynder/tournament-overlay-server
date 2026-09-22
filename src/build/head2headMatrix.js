@@ -20,6 +20,8 @@ function isEventFiltered(filters, set){
  * @param {Filters?} eventFilters 
  */
 export function buildMatchesMatrix(playersList, eventFilters){
+    playersList = playersList.sort((p1, p2) => p1.player.id - p2.player.id);
+
     let indexes = playersList.reduce((prev, current, index) => {
         prev[current.player.id] = index;
         return prev;
@@ -35,13 +37,12 @@ export function buildMatchesMatrix(playersList, eventFilters){
             if (!set.event) continue;
             if (!set.completedAt) continue; //match pas fini
             if (isEventFiltered(eventFilters, set)) continue;
-
+ 
             let currentPlayerSlotIndex = null;
-            if (set.slots[0].entrant.participants.length > 1) continue; //2v2
+            if (set.slots[0].ids.length > 1) continue; //2v2
             for (let i = 0; i < 2; i++){
-                let p = set.slots[i].entrant.participants[0]
-                if (!p.player) continue;
-                if (p.player.id == id){
+                let id_ = set.slots[i].ids[0];
+                if (id_ == id){
                     currentPlayerSlotIndex = i;
                 }
             }
@@ -49,7 +50,7 @@ export function buildMatchesMatrix(playersList, eventFilters){
                 console.error("[Skipping] PLAYER NOT FOUND IN OWN SET", set, id, playerData.player.slug);
                 continue;
             }
-            let otherPlayerID = deep_get_raw(set, null, "slots", 1 - currentPlayerSlotIndex, "entrant", "participants", 0, "player", "id");
+            let otherPlayerID = deep_get_raw(set, null, "slots", 1 - currentPlayerSlotIndex, "ids", 0);
             if (otherPlayerID === null){
                 console.warn("[Skipping] Other player doesn't have a user ID", set, id, playerData.player.slug);
                 continue;
@@ -80,12 +81,10 @@ export function buildMatchesMatrix(playersList, eventFilters){
         for (let j = 0; j < line.h2hs.length; j++){
             const h2h = line.h2hs[j];
             const otherPlayer = playersList[i + j + 1].player; //why +1 ? matrixes are hard
-            const otherHashLine = hashMatrix[otherPlayer.id];
 
             console.log("- Other player :", otherPlayer.gamerTag, otherPlayer.id);
 
             myHashLine[otherPlayer.id] = h2h;
-            otherHashLine[id] = h2h;
         }
     }
 

@@ -31,9 +31,9 @@ export async function build(event, config){
     
     console.log("Loading players sets");
 
-    const players = eventData.players//.slice(0, 20);
+    const players = eventData.players//.slice(0, 10);
     const playersData = await getPlayersData(client, players, limiter);
-    
+
     limiter.stop();
 
     console.log("Building head-to-head matrix");
