@@ -65,8 +65,6 @@ export function buildMatchesMatrix(playersList, eventFilters){
         return {h2hs, playerData};
     })
 
-    console.log(matrix);
-
     /** @type {import("../common/types").h2hMatrix} */
     let hashMatrix = playersList.reduce((prev, current) => {
         prev[current.player.id] = {};
@@ -77,12 +75,12 @@ export function buildMatchesMatrix(playersList, eventFilters){
 
         const id = line.playerData.player.id;
         const myHashLine = hashMatrix[id]
-        console.log("Current line :", line.playerData.player.gamerTag, id);
+        //console.log("Current line :", line.playerData.player.gamerTag, id);
         for (let j = 0; j < line.h2hs.length; j++){
             const h2h = line.h2hs[j];
             const otherPlayer = playersList[i + j + 1].player; //why +1 ? matrixes are hard
 
-            console.log("- Other player :", otherPlayer.gamerTag, otherPlayer.id);
+            //console.log("- Other player :", otherPlayer.gamerTag, otherPlayer.id);
 
             myHashLine[otherPlayer.id] = h2h;
         }

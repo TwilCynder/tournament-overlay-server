@@ -63,6 +63,8 @@ export class DataManager extends EventEmitter {
         let id1 = findPlayerID(p1, players);
         let id2 = findPlayerID(p2, players);
 
+        let ids = {id1, id2};
+
         let inverted;
         if (id1 > id2) [inverted, id1, id2] = [true, id2, id1];
 
@@ -71,6 +73,6 @@ export class DataManager extends EventEmitter {
         const h2h = p1h2h[id2];
         if (!h2h) throw new ServerError(404, null, "Cannot find H2H data for player " + playerString(id2, p2));
 
-        return {inverted, h2h};
+        return {ids, h2h};
     }
 }

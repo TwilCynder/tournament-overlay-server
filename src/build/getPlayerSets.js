@@ -24,7 +24,7 @@ function deep_get_or_else(obj, ...path){
 
 function processSet(startggSet){
     try {
-        if (!startggSet.slots || startggSet.slots.lenth != 2) throw new SkipSetSentinel;
+        if (!startggSet.slots || startggSet.slots.length != 2) throw new SkipSetSentinel;
 
         let winner = null;
         const slots = startggSet.slots.map((slot, i) => {
@@ -33,7 +33,7 @@ function processSet(startggSet){
             const participants = deep_get_or_else(entrant, "participants");
 
             const ids = participants.map((participant) => participant.player.id);
-            const score = deep_get_raw(slot, "standing", "stats", "score", "value");
+            const score = deep_get_raw(slot, null, "standing", "stats", "score", "value");
             if (score < 0) throw new SkipSetSentinel;
             const placement = deep_get_or_else(slot, "standing", "placement");
             if (placement == 1) winner = i;
@@ -67,7 +67,7 @@ export async function getPlayersSetsFactory(queryManager = new QueryManager){
      * @returns {import("../common/types.js").Set[]}
      */
     return function getPlayerSets(client, id, limiter){
-        return query.executePaginated(client, {id}, "player.sets", limiter)
+        return query.executePaginated(client, {id}, "player.sets", limiter, /*{maxElements: 100}*/)
             .catch(err => {
                 throw new FormattableError(err, "Could not fetch sets for player", id);
             })
