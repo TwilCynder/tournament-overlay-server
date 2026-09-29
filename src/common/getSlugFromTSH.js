@@ -14,7 +14,7 @@ export async function getEventFromTSH(event){
     
         const tshUserSettings = await readJSON(joinPath(process.env.TSH_PATH, "/user_data/settings.json"));
         event = tshUserSettings.TOURNAMENT_URL;
-    
+
         if (!event){
             throw new FormattableError("No event specified or selected in TSH");
         }

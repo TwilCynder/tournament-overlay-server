@@ -15,7 +15,7 @@ let {event, sggog_addr, sggog_addr_default} = new ArgumentsManager()
     .enableHelpParameter()
     .parseProcessArguments()
 
-sggog_addr = sggog_addr ?? sggog_addr_default ? "localhost:54301" : null;
+sggog_addr = sggog_addr ?? (sggog_addr_default ? "localhost:54301" : null) ?? process.env.SGGOG_ADDR;
 
 event = await getEventFromTSH(event).catch(err => error(3, err));
 

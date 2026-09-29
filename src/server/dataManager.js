@@ -18,11 +18,15 @@ export class DataManager extends EventEmitter {
         this.#data = null;
     }
 
+    getEvent(){
+        return this.#event;
+    }
+
     async #load(eventSlug){
         const eventURL = await getEventFromTSH(eventSlug);
 
         const [slug, filenename] = getSlugAndFilename(eventURL);
-        this.#event = eventSlug;
+        this.#event = slug;
 
         /** @type {import("../common/types.js").Data} */
         const data = await tryReadJSON(filenename);
@@ -72,6 +76,8 @@ export class DataManager extends EventEmitter {
         if (!p1h2h) throw new ServerError(404, null, "Cannot find H2H data for player " + playerString(id1, p1));
         const h2h = p1h2h[id2];
         if (!h2h) throw new ServerError(404, null, "Cannot find H2H data for player " + playerString(id2, p2));
+
+        console.log("Answered H2H request for", playerString(id1, p1), "-", playerString(id2, p2));
 
         return {ids, h2h};
     }

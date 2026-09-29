@@ -28,6 +28,7 @@ async function SGGOGToken(sggog_addr){
 export async function createClientAuto(sggog_addr){
     let token = process.env.STARTGG_API_TOKEN;
     if (token){
+        if (!token.startsWith("Bearer ")) token = "Bearer " + token;
         console.log("Token found in env variables");
     } else if (sggog_addr) {
         console.log("Asking SGGOG for a token");
