@@ -18,10 +18,12 @@ export class DataManager extends EventEmitter {
         this.#data = null;
     }
 
-    async #load(eventSlug){
-        const eventURL = await getEventFromTSH(eventSlug);
-
-        const [slug, filenename] = getSlugAndFilename(eventURL);
+    /**
+     * Loads data for the specified event, assuming that the slug is non-null
+     * @param {string} eventSlug 
+     */
+    async #loadForEvent_(eventSlug){
+        const [slug, filenename] = getSlugAndFilename(eventSlug);
         this.#event = eventSlug;
 
         /** @type {import("../common/types.js").Data} */
@@ -39,8 +41,38 @@ export class DataManager extends EventEmitter {
         return true;
     }
 
-    load(eventSlug){
-        this.#load(eventSlug).then(result => this.emit("dataLoaded", result, this.#data));
+    /**
+     * Loads data for the specified event, assuming that the slug is non-null. Fires a dataLoaded event with the result
+     * @param {string} eventSlug 
+     */
+    #loadForEvent(eventSlug){
+        return this.#loadForEvent_(eventSlug).then(result => {
+            this.emit("dataLoaded", result, this.#data);
+            return result;
+        });
+    }
+
+    /**
+     * Tries loading a data file for the currently selected event
+     * @returns 
+     */
+    loadCurrentEvent(){
+        if (!this.#event){
+            throw new ServerError(500, null, "Cannot retry loading, no event has been selected")
+        }
+
+        return this.#loadForEvent(this.#event);
+    }
+
+    /**
+     * Tries loading data for the specified event slug ; if no event is specified, tries loading the event slug from TSH.  
+     * If an event slug is obtained, it is set as the current even if no data could be loaded
+     * @param {string?} eventSlug 
+     */
+    async load(eventSlug){
+        const eventURL = await getEventFromTSH(eventSlug);
+
+        return await this.#loadForEvent(eventURL)
     }
 
     getData(){
@@ -65,8 +97,7 @@ export class DataManager extends EventEmitter {
 
         let ids = {id1, id2};
 
-        let inverted;
-        if (id1 > id2) [inverted, id1, id2] = [true, id2, id1];
+        if (id1 > id2) [id1, id2] = [id2, id1];
 
         const p1h2h = matrix[id1];
         if (!p1h2h) throw new ServerError(404, null, "Cannot find H2H data for player " + playerString(id1, p1));

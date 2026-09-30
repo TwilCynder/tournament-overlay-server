@@ -1,16 +1,5 @@
 import { Router } from "express";
-import { handleServerError } from "./serverError.js";
-
-/** @param {import("express").RequestHandler} f  */
-function handledServerCallback(f){
-    return (req, res) => {
-        try {
-            return f(req, res);
-        } catch (err) {
-            handleServerError(err, req, res);
-        }
-    }
-}
+import { handledServerCallback } from "./serverUtil.js";
 
 /** @param {import("./dataManager").DataManager} dataManager  */
 export function dataRouter(dataManager){
