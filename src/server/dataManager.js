@@ -22,6 +22,7 @@ export class DataManager extends EventEmitter {
         return this.#event;
     }
 
+    /** @param {string?} eventSlug */
     async #load(eventSlug){
         const eventURL = await getEventFromTSH(eventSlug);
 
