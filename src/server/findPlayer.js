@@ -20,5 +20,6 @@ export function findPlayerID(handle, players){
 
 /** @param {import("./types.js").PlayerHandle} player */
 export function playerString(id, player){
-    return ("name" in player) ? `${player.name} (${id})` : "id "+ id;
+    console.log(player)
+    return player.name ? `${player.name} (${id})` : "id "+ id;
 }

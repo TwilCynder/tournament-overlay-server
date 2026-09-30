@@ -12,10 +12,11 @@ let {event, sggog_addr, sggog_addr_default} = new ArgumentsManager()
     .addOption(["-e", "--event"], {description: "URL of the event to load H2H for. Defaults to the one selected in TSH"}, true)
     .addOption(["-a", "--sggog-addr"], {description: "Address at which to find startgg-oauth-gate ; will be used to find a token if specified, unless one is already present in the environment variables"}, true)
     .addSwitch(["-A", "--sggog-addr-default"], {description: "Use the default address, localhost:54301, to find startgg-ouauth-gate"}, true)
+    .addSwitch(["-S", "--slow-mode"], {description: "Sends only one request at a time ; slower, but lower risk of failing whe start.gg's API backend is struggling"})
     .enableHelpParameter()
     .parseProcessArguments()
 
-sggog_addr = sggog_addr ?? sggog_addr_default ? "localhost:54301" : null;
+sggog_addr = sggog_addr ?? (sggog_addr_default ? "localhost:54301" : null) ?? process.env.SGGOG_ADDR;
 
 event = await getEventFromTSH(event).catch(err => error(3, err));
 

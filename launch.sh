@@ -1,4 +1,5 @@
 #! /usr/bin/env bash
 script=$1
 shift
-node --env-file=.env $script.js $@
+if [[ $script != *.js ]]; then $script="$script.js"; fi
+node --env-file=.env $script $@

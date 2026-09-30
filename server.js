@@ -14,6 +14,7 @@ let {event, load, port} = new ArgumentsManager()
 const dm = new DataManager();
 dm.on("dataLoaded", (success, data) => {
     if (success) console.log("Successfully loaded data for event", data.event, "with", data.players.length, "players");
+    else console.log("No data to load for event", dm.getEvent());
 })
 
 if (event || load){

@@ -18,6 +18,10 @@ export class DataManager extends EventEmitter {
         this.#data = null;
     }
 
+    getEvent(){
+        return this.#event;
+    }
+
     /**
      * Loads data for the specified event, assuming that the slug is non-null
      * @param {string} eventSlug 
@@ -103,6 +107,8 @@ export class DataManager extends EventEmitter {
         if (!p1h2h) throw new ServerError(404, null, "Cannot find H2H data for player " + playerString(id1, p1));
         const h2h = p1h2h[id2];
         if (!h2h) throw new ServerError(404, null, "Cannot find H2H data for player " + playerString(id2, p2));
+
+        console.log("Answered H2H request for", playerString(id1, p1), "-", playerString(id2, p2));
 
         return {ids, h2h};
     }
