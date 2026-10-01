@@ -2,6 +2,9 @@ import { ArgumentsManager } from "@twilcynder/arguments-parser";
 import { DataManager } from "./src/server/dataManager.js";
 import express from "express";
 import { dataRouter } from "./src/server/dataServer.js";
+import { WebSocketServer } from "ws";
+import { createServer } from "http"
+import { initWS } from "./src/server/controlServer.js";
 
 let {event, load, port} = new ArgumentsManager()
     .setParameters({guessLowDashes: true})
@@ -21,8 +24,14 @@ if (event || load){
     dm.load(event);
 }
 
-const server = express();
-server.use("/data", dataRouter(dm));
+const app = express();
+const server = createServer(app);
+
+app.use(express.static("./uiWebsite"));
+app.use("/data", dataRouter(dm));
+
+const wss = new WebSocketServer({server, clientTracking: true});
+initWS(wss);
 
 port = port ?? process.env.PORT ?? 5001;
 server.listen(port);
