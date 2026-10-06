@@ -7,7 +7,7 @@ import { getSlugAndFilename } from "./src/common/slug.js";
 import { error } from "./src/common/error.js";
 import { getEventFromTSH } from "./src/common/getSlugFromTSH.js";
 
-let {event, sggog_addr, sggog_addr_default} = new ArgumentsManager()
+let {event, sggog_addr, sggog_addr_default, slow_mode} = new ArgumentsManager()
     .setParameters({guessLowDashes: true})
     .addOption(["-e", "--event"], {description: "URL of the event to load H2H for. Defaults to the one selected in TSH"}, true)
     .addOption(["-a", "--sggog-addr"], {description: "Address at which to find startgg-oauth-gate ; will be used to find a token if specified, unless one is already present in the environment variables"}, true)
@@ -18,6 +18,8 @@ let {event, sggog_addr, sggog_addr_default} = new ArgumentsManager()
 
 sggog_addr = sggog_addr ?? (sggog_addr_default ? "localhost:54301" : null) ?? process.env.SGGOG_ADDR;
 
+
+
 event = await getEventFromTSH(event).catch(err => error(3, err));
 
 let filename;
@@ -27,7 +29,7 @@ try {
     error(2, err.message)
 }
 
-const data = await build(event, {sggog_addr}).catch(err => error(5, "Error while building the data :", err));
+const data = await build(event, {sggog_addr, slowMode: slow_mode}).catch(err => error(5, "Error while building the data :", err));
 
 const {matrix, players} = data;
 for (const playerData of players){

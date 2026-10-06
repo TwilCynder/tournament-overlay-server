@@ -33,7 +33,7 @@ export async function build(event, config){
         console.log("-", entrant.gamerTag);
     }
 
-    const players = eventData.players.slice(0, 10);
+    const players = eventData.players//.slice(0, 10);
     const playersData = await getPlayersData(client, players, limiter, config);
 
     limiter.stop();
