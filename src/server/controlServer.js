@@ -1,16 +1,28 @@
-import { raw, Router } from "express";
-import { handledServerCallback } from "./serverUtil.js";
+//TODO : implement operation IDs
+
 import { WebSocketServer } from "ws";
 import { FormattableError } from "../common/error.js";
+import { sendJSON } from "../../uiWebsite/src/WSUtil.js";
 
-/** @param {import("./dataManager").DataManager} dataManager  */
-export function controlRouter(dataManager){
-    const router = Router();
+/** @param {WebSocket} ws @param {import("./wsProtocol").OperationFeedbackStatus} status @param {string?} message  */
+function sendOperationFeedback(ws, status, message){
+    sendJSON(ws, {
+        type: "operation-feedback",
+        status,
+        message
+    });
+}
 
-    router.all("/try-load-event", handledServerCallback(async (req, res, next) => {
-        await dataManager.load();
-        res.status(200).send();
-    }))
+/**
+ * Sends an error message through websocket based on the Error that happened : uses the user-friendly message if it's a ServerError
+ * @param {WebSocket} ws @param {Error} err 
+ */
+function handleWSServerError(ws, err){
+    const message = getServerErrorMessage(err);
+
+    sendOperationFeedback(ws, "error", message);
+
+    printError("Error while processing WS request :", err);
 }
 
 /**
@@ -23,7 +35,7 @@ export function initWS(wss, dataManager){
             try {
                 if (isBinary) throw new FormattableError(null, "Invalid message received : binary message");
 
-                /** @type {import("./wsProtocol").WSControlMessage} */
+                /** @type {import("./wsProtocol").WSControlMessageIncoming} */
                 let msg = JSON.parse(rawMsg.toString());
                 console.log(msg);
 
@@ -34,8 +46,10 @@ export function initWS(wss, dataManager){
                     case "retry-load-data":
                         break;
                 }
+
+                sendOperationFeedback(ws, "ok");
             } catch (err) {
-                console.error("Error while processing WS message :", err);
+                handleWSServerError(ws, err)
             }
 
         })

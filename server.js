@@ -31,7 +31,7 @@ app.use(express.static("./uiWebsite"));
 app.use("/data", dataRouter(dm));
 
 const wss = new WebSocketServer({server, clientTracking: true});
-initWS(wss);
+initWS(wss, dm);
 
 port = port ?? process.env.PORT ?? 5001;
 server.listen(port);

@@ -1,7 +1,7 @@
 import { LimitedDepthObject, NoCauseFormattableError } from "../common/error.js";
 import { readJSON, tryReadJSON } from "../build/util/io.js";
 import { findPlayerID } from "./findPlayer.js";
-import { ServerError } from "./serverError.js";
+import { HTTPServerError } from "./serverError.js";
 import { getSlugAndFilename } from "../common/slug.js";
 import { playerString } from "./findPlayer.js";
 import { getEventFromTSH } from "../common/getSlugFromTSH.js";
@@ -62,7 +62,7 @@ export class DataManager extends EventEmitter {
      */
     loadCurrentEvent(){
         if (!this.#event){
-            throw new ServerError(500, null, "Cannot retry loading, no event has been selected")
+            throw new HTTPServerError(500, null, "Cannot retry loading, no event has been selected")
         }
 
         return this.#loadForEvent(this.#event);
@@ -71,16 +71,16 @@ export class DataManager extends EventEmitter {
     /**
      * Tries loading data for the specified event slug ; if no event is specified, tries loading the event slug from TSH.  
      * If an event slug is obtained, it is set as the current even if no data could be loaded
-     * @param {string?} eventSlug 
+     * @param {string?} eventURL 
      */
-    async load(eventSlug){
-        const eventURL = await getEventFromTSH(eventSlug);
+    async load(eventURL){
+        eventURL = await getEventFromTSH(eventURL);
 
         return await this.#loadForEvent(eventURL)
     }
 
     getData(){
-        if (!this.#data) throw new ServerError(500, "Data has not been loaded yet");
+        if (!this.#data) throw new HTTPServerError(500, "Data has not been loaded yet");
         return this.#data;
     }
 
@@ -94,7 +94,7 @@ export class DataManager extends EventEmitter {
         const matrix = data.matrix;
         const players = data.players;
         
-        if (!matrix) throw new ServerError(404, "H2H data is not included in the data");
+        if (!matrix) throw new HTTPServerError(404, "H2H data is not included in the data");
 
         let id1 = findPlayerID(p1, players);
         let id2 = findPlayerID(p2, players);
@@ -104,9 +104,9 @@ export class DataManager extends EventEmitter {
         if (id1 > id2) [id1, id2] = [id2, id1];
 
         const p1h2h = matrix[id1];
-        if (!p1h2h) throw new ServerError(404, null, "Cannot find H2H data for player " + playerString(id1, p1));
+        if (!p1h2h) throw new HTTPServerError(404, null, "Cannot find H2H data for player " + playerString(id1, p1));
         const h2h = p1h2h[id2];
-        if (!h2h) throw new ServerError(404, null, "Cannot find H2H data for player " + playerString(id2, p2));
+        if (!h2h) throw new HTTPServerError(404, null, "Cannot find H2H data for player " + playerString(id2, p2));
 
         console.log("Answered H2H request for", playerString(id1, p1), "-", playerString(id2, p2));
 

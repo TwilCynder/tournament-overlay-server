@@ -1,21 +1,29 @@
+import { sendJSON } from "../../uiWebsite/src/WSUtil.js";
 import { FormattableError, printError } from "../common/error.js";
 
+/**
+ * Error with a message we can dislpay to the user if it happens while treating a request
+ */
 export class ServerError extends FormattableError {
-    constructor(code, cause, userMesssage, ...msg){
+    constructor(cause, userMesssage, ...msg){
         if (msg.length == 0) msg[0] = userMesssage;
         if (cause instanceof ServerError) userMesssage += " : " + cause.userMesssage;
         super(cause, ...msg);
         this.userMesssage = userMesssage;
+    }
+}
+
+/**
+ * ServerError with an HTTP status code, to be added to the error response if it happens while treating an HTTP request
+ */
+export class HTTPServerError extends ServerError {
+    constructor(code, cause, userMesssage, ...msg){
+        super(cause, userMesssage, ...msg);
         this.code = code;
     }
 }
 
-/** @param {Error} err  @param {import ("express").Response} res @param {import("express").Request} req  */
-export function handleServerError(err, req, res){
-    if (err instanceof ServerError){
-        res.status(err.code).type('txt').send("Error : " + err.userMesssage);
-    } else {
-        res.status(500).type('txt').send("Internal error");
-    }
-    printError("Error while processing request :", err);
+/** @param {Error} err  */
+export function getServerErrorMessage(err){
+    return err instanceof ServerError ? ("Error : " + err.userMesssage) : "Internal error";
 }

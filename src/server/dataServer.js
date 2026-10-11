@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { handledServerCallback } from "./serverUtil.js";
+import { handledHTTPServerCallback, handledServerCallback } from "./httpServerCommon";
 
 /** @param {import("./dataManager").DataManager} dataManager  */
 export function dataRouter(dataManager){
@@ -10,7 +10,7 @@ export function dataRouter(dataManager){
         next();
     });
 
-    router.all("/h2h", handledServerCallback((req, res) => {
+    router.all("/h2h", handledHTTPServerCallback((req, res) => {
         const h2h = dataManager.getH2H(
             {id: req.query.p1, name: req.query.p1Name},
             {id: req.query.p2, name: req.query.p2Name}

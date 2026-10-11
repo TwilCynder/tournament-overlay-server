@@ -1,5 +1,5 @@
 import { fmtS, NoCauseFormattableError } from "../common/error.js";
-import { ServerError } from "./serverError.js";
+import { HTTPServerError } from "./serverError.js";
 
 /**
  * @param {import("./types.js").PlayerHandle} handle 
@@ -15,7 +15,7 @@ export function findPlayerID(handle, players){
         }
     }
 
-    throw new ServerError(404, null, "Player not found :", handle.name);
+    throw new HTTPServerError(404, null, "Player not found :", handle.name);
 }
 
 /** @param {import("./types.js").PlayerHandle} player */
