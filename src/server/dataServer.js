@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { handledHTTPServerCallback, handledServerCallback } from "./httpServerCommon";
+import { handledHTTPServerCallback } from "./httpServerCommon.js";
 
 /** @param {import("./dataManager").DataManager} dataManager  */
 export function dataRouter(dataManager){

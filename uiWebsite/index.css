@@ -6,8 +6,6 @@ body {
 
 .panel {
     display: none;
-
-    
 }
 
 .initial {
@@ -20,4 +18,35 @@ body {
 
     border-radius: 5px;
     border-style: none;
+    padding: 10px;
+    box-sizing: border-box;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    word-wrap: normal;
+    cursor: pointer;
+
+    font-size: 20px;
+    background-color: #ccffcc;
+}
+
+.button:hover {
+    background-color: #bbffbb;
+}
+
+#status {
+    font-size: 25px;
+    margin-bottom: 10px;
+}
+
+.feedback-container {
+    font-size: 20px;
+    margin-top: 20px;
+}
+
+#feedback {
+    display: inline;
 }

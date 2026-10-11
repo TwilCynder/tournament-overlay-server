@@ -5,7 +5,7 @@ import fs from "fs/promises";
 import { build } from "./src/build.js";
 import { getSlugAndFilename } from "./src/common/slug.js";
 import { error } from "./src/common/error.js";
-import { getEventFromTSH } from "./src/common/getSlugFromTSH.js";
+import { getEventFromTSH } from "./src/common/getEventFromTSH.js";
 
 let {event, sggog_addr, sggog_addr_default, slow_mode} = new ArgumentsManager()
     .setParameters({guessLowDashes: true})

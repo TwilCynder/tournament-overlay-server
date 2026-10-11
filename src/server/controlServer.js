@@ -1,4 +1,12 @@
 //TODO : implement operation IDs
+/*
+A terme, il faudrait que le client garde tous les messages envoyés et les trie par opération, de manière à pouvoir afficher :
+- juste le dernier message sur la dernière opération
+- le dernier message sur chaque opération (de manière à pouvoir voir le statut actuel, mais aussi un historique des opérations avec leur résultat)
+- un historique complet des messages
+
+ne pas oublier : à terme on pourra déclencher un build depuis l'UI, donc ça fera une très grosse masse de msgs pour une seule opération
+*/
 
 import { WebSocketServer } from "ws";
 import { FormattableError } from "../common/error.js";
@@ -6,11 +14,11 @@ import { sendJSON } from "../../uiWebsite/src/WSUtil.js";
 
 /** @param {WebSocket} ws @param {import("./wsProtocol").OperationFeedbackStatus} status @param {string?} message  */
 function sendOperationFeedback(ws, status, message){
-    sendJSON(ws, {
+    ws.send(JSON.stringify({
         type: "operation-feedback",
         status,
         message
-    });
+    }));
 }
 
 /**
@@ -41,7 +49,9 @@ export function initWS(wss, dataManager){
 
                 switch (msg.op){
                     case "load-data":
-                        dataManager.load(msg.url);
+                        dataManager.load(msg.url).then((success) => {
+                            sendOperationFeedback(ws, "success", "Loaded event from TSH ; data file " + (success ? "loaded" : "not found"));
+                        });
                         break;
                     case "retry-load-data":
                         break;
@@ -53,5 +63,9 @@ export function initWS(wss, dataManager){
             }
 
         })
+    })
+
+    dataManager.addListener("load", () => {
+        
     })
 }

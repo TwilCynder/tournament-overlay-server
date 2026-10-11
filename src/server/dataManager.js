@@ -4,7 +4,7 @@ import { findPlayerID } from "./findPlayer.js";
 import { HTTPServerError } from "./serverError.js";
 import { getSlugAndFilename } from "../common/slug.js";
 import { playerString } from "./findPlayer.js";
-import { getEventFromTSH } from "../common/getSlugFromTSH.js";
+import { getEventFromTSH } from "../common/getEventFromTSH.js";
 import { EventEmitter } from "events"
 
 export class DataManager extends EventEmitter {
