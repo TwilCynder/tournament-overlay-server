@@ -6,19 +6,33 @@ A terme, il faudrait que le client garde tous les messages envoyés et les trie 
 - un historique complet des messages
 
 ne pas oublier : à terme on pourra déclencher un build depuis l'UI, donc ça fera une très grosse masse de msgs pour une seule opération
+
+Rewrite typescript : fonctions créant les objets message ; le type sera dérivé des valeurs de retour de ces fonctions
 */
 
 import { WebSocketServer } from "ws";
 import { FormattableError } from "../common/error.js";
-import { sendJSON } from "../../uiWebsite/src/WSUtil.js";
 
-/** @param {WebSocket} ws @param {import("./wsProtocol").OperationFeedbackStatus} status @param {string?} message  */
-function sendOperationFeedback(ws, status, message){
-    ws.send(JSON.stringify({
+/** @param {WebSocket} ws @param {*} obj  */
+function sendJSON(ws, obj){
+    ws.send(JSON.stringify(obj))
+}
+
+/** @param {WebSocket} ws @param {import("./wsProtocol").OperationFeedbackStatus} feedbackStatus @param {string?} message  */
+function sendOperationFeedback(ws, feedbackStatus, message){
+    sendJSON(ws, {
         type: "operation-feedback",
-        status,
+        status: feedbackStatus,
         message
-    }));
+    });
+}
+
+/**
+ * @param {WebSocket} ws 
+ * @param {import("./wsProtocol").Status} status 
+ */
+function sendStatus(ws, status){
+    sendJSON(ws, Object.assign(status, {type: "status"}))
 }
 
 /**
@@ -31,6 +45,17 @@ function handleWSServerError(ws, err){
     sendOperationFeedback(ws, "error", message);
 
     printError("Error while processing WS request :", err);
+}
+
+/** @param {import("./dataManager.js").DataManager} dm @returns {import("./wsProtocol").Status}*/
+function getStatus(dm){
+    const slug = dm.getEvent();
+    if (!slug) return {mode: "nothing-loaded"};
+
+    const data = dm.tryGetData();
+    return data ?
+        {mode: "data-loaded", slug, numEntrants: data.players.length} : 
+        {mode: "event-set", slug} 
 }
 
 /**
@@ -61,11 +86,15 @@ export function initWS(wss, dataManager){
             } catch (err) {
                 handleWSServerError(ws, err)
             }
-
         })
+
+        sendJSON(ws, getStatus(dataManager));
     })
 
-    dataManager.addListener("load", () => {
-        
+    dataManager.addListener("dataLoaded", () => {
+        const status = getStatus(dataManager);
+        for (const ws of wss.clients){
+            sendStatus(ws, status);
+        }
     })
 }

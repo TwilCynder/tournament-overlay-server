@@ -3,8 +3,9 @@ import { sendJSON } from "./src/WSUtil.js";
 
 /**
  * @typedef {import("../src/server/wsProtocol.js").WSControlMessageIncoming} WSCommand
+ * @typedef {import("../src/server/wsProtocol.js").WSControlMessageOutcoming} WSMessage
  * @typedef {import("../src/server/wsProtocol.js").OperationFeedback} WSFeedbackMessage
- * @typedef {import("../src/server/wsProtocol.js").Status} WSStatusMessage
+ * @typedef {import("../src/server/wsProtocol.js").StatusMessage} WSStatusMessage  
  */
 
 const url = "ws://" + window.location.host;
@@ -15,43 +16,79 @@ const PANELS = {
     eventSelected: document.getElementById("event-selected"),
 
 }
+const statusElement = document.getElementById("status");
 const feedbackElement = document.getElementById("feedback");
 
-//const contentSwitcher = new ContentSwitcher(document.querySelector(".panel.initial"));
+const contentSwitcher = new ContentSwitcher(document.querySelector(".panel.initial")); 
 
-/** @param {WSCommand} obj  */
-function sendCommand(ws, obj){
-    sendJSON(ws, obj);
-    feedbackElement.innerHTML = "Waiting for server's response"
+/**
+ * @typedef {{name: string, body: (...args) => WSCommand}} Operation
+ * type {{[name: string]: Operation}}
+ */
+const operations = {
+    loadEventFromTSH: {name: "Load event from TSH", body: () => ({op: "load-data", url: null})}
 }
 
-document.getElementById("button-load-event").onclick = () => {
-    sendCommand(ws, {op: "load-data", url: null});
+/** @type {Operation?} */
+let lastOperation = null;
+
+/** @param {string} cssClass @param {string} message  */
+function setFeedbackContent(message, cssClass = ""){
+    feedbackElement.innerHTML = `<span class="${cssClass}">${lastOperation.name} - ${message}</span>`;
 }
 
-ws.onopen = () => {
-    //ws.send(JSON.stringify({test: true}));
-}
-
-/** @param {WSFeedbackMessage} obj  */
-function getFeedbackMessage(obj){
-    switch (obj.status){
+/** @param {WSFeedbackMessage} res  */
+function processFeedbackResponse(res){
+    switch (res.status){
         case "error": 
-            return obj.message ?? "Error"; //ajouter decoration ou jsp
-            break;
+            return [res.message ?? "Error", "error-message"]; //ajouter decoration ou jsp
         case "ok":
-            return "Server processing request ...";
+            return ["Server processing request ..."];
         case "success":
-            return obj.message ?? "Success";
+            return [res.message ?? "Success", "success-message"];
+    }
+}
+
+/** @param {WSStatusMessage} message */
+function processStatusMessage(message){
+    switch (message.mode){
+        case "nothing-loaded": 
+            contentSwitcher.showElement(PANELS.nothingLoaded);
+            statusElement.innerHTML = "No event selected";
+            break;
+
+        case "event-set":
+            contentSwitcher.showElement(PANELS.eventSelected);
+            statusElement.innerHTML = `Event selected : ${message.slug} | No data loaded`;
+            break;
+        case "data-loaded":
+            break;
     }
 }
 
 ws.addEventListener("message", (event) => {
+    /** @type {WSMessage} */
     const obj = JSON.parse(event.data);
     console.log(obj)
     switch (obj.type){
         case "operation-feedback":
-            feedbackElement.innerHTML = getFeedbackMessage(obj);
+            setFeedbackContent(...processFeedbackResponse(obj));
+            break;
+        case "status":
+            processStatusMessage(obj);
             break;
     }
-})
+});
+
+
+
+/** @param {WSCommand} obj @param {Operation} op @param {...any} args  */
+function sendCommand(ws, op, ...args){
+    sendJSON(ws, op.body(...args));
+    lastOperation = op;
+    setFeedbackContent("Waiting for server response ...");
+}
+
+document.getElementById("button-load-event").onclick = () => {
+    sendCommand(ws, operations.loadEventFromTSH);
+}

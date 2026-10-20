@@ -30,11 +30,22 @@ body {
     cursor: pointer;
 
     font-size: 20px;
+}
+
+#button-load-event {
     background-color: #ccffcc;
 }
 
-.button:hover {
+#button-load-event:hover {
     background-color: #bbffbb;
+}
+
+#button-retry-data {
+    background-color: #ffcccc;
+}
+
+#button-retry-data:hover {
+    background-color: #ffbbbb;
 }
 
 #status {
@@ -49,4 +60,12 @@ body {
 
 #feedback {
     display: inline;
+}
+
+.success-message {
+    color: green;
+}
+
+.error-message {
+    color: red;
 }

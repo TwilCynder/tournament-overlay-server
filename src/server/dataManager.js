@@ -8,18 +8,14 @@ import { getEventFromTSH } from "../common/getEventFromTSH.js";
 import { EventEmitter } from "events"
 
 export class DataManager extends EventEmitter {
-    /** @type {import("../common/types.js").Data} */
+    /** @type {import("../common/types.js").Data?} */
     #data;
-    /** @type {string} */
+    /** @type {string?} */
     #event;
 
     constructor(){
         super();
         this.#data = null;
-    }
-
-    getEvent(){
-        return this.#event;
     }
 
     /**
@@ -77,6 +73,14 @@ export class DataManager extends EventEmitter {
         eventURL = await getEventFromTSH(eventURL);
 
         return await this.#loadForEvent(eventURL)
+    }
+
+    getEvent(){
+        return this.#event;
+    }
+
+    tryGetData(){
+        return this.#data;
     }
 
     getData(){
