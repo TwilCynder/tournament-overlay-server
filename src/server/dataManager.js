@@ -20,11 +20,11 @@ export class DataManager extends EventEmitter {
 
     /**
      * Loads data for the specified event, assuming that the slug is non-null
-     * @param {string} eventSlug 
+     * @param {string} eventURL 
      */
-    async #loadForEvent_(eventSlug){
-        const [slug, filenename] = getSlugAndFilename(eventSlug);
-        this.#event = eventSlug;
+    async #loadForEvent_(eventURL){
+        const [slug, filenename] = getSlugAndFilename(eventURL);
+        this.#event = slug;
 
         /** @type {import("../common/types.js").Data} */
         const data = await tryReadJSON(filenename);

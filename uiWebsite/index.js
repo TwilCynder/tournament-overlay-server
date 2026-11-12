@@ -59,7 +59,7 @@ function processStatusMessage(message){
 
         case "event-set":
             contentSwitcher.showElement(PANELS.eventSelected);
-            statusElement.innerHTML = `Event selected : ${message.slug} | No data loaded`;
+            statusElement.innerHTML = `Event selected : ${message.slug} <br> No data loaded`;
             break;
         case "data-loaded":
             break;

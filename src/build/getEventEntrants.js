@@ -23,6 +23,8 @@ export async function getEventInfoFactory(queryManager = new QueryManager){
                 return p[0].player;
             }).filter(player => !!player);
 
+            delete data.event.entrants;
+
             return {event: data.event, players};
         } catch (err){
             throw new FormattableError(err, "Could not load players for event", slug)   

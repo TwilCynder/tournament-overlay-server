@@ -8,13 +8,13 @@ import { durationString } from "./build/util/timeString.js";
 
 /**
  * TODO : callbacks
- * @param {string} event Event slug
+ * @param {string} eventSlug Event slug
  * @param {Object} config 
  * @param {string} config.sggog_addr Address for SGGOG
  * @param {boolean} config.silentQueries 
  * @param {boolean} config.slowMode Send only one request at a time 
  */
-export async function build(event, config){
+export async function build(eventSlug, config){
     const qm = new QueryManager;
     const [client, getEventInfo, getPlayersData] = await Promise.all([
         createClientAuto(config.sggog_addr), 
@@ -23,11 +23,11 @@ export async function build(event, config){
     );
     const limiter = new DelayQueryLimiter(60);
 
-    console.log("Loading entrants for event", event);
+    console.log("Loading entrants for event", eventSlug);
 
     let startTime = Date.now();
 
-    const eventData = await getEventInfo(client, event, limiter);
+    const eventData = await getEventInfo(client, eventSlug, limiter);
     console.log("Event :", eventData.event.tournament.name, "-", eventData.event.name, "-", eventData.event.videogame.name, "- (" + eventData.event.videogame.id + ")")
     for (const entrant of eventData.players){
         console.log("-", entrant.gamerTag);
@@ -47,8 +47,11 @@ export async function build(event, config){
 
     console.log("Build matrix in", durationString(Date.now() - startTime));
 
+    delete eventData.players;
+
     return {
         matrix, players,
-        event
+        eventSlug,
+        event: eventData.event
     }
 }
