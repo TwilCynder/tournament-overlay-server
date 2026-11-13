@@ -6,6 +6,7 @@ body {
 
 .panel {
     display: none;
+    gap: 20px;
 }
 
 .initial {
@@ -17,7 +18,8 @@ body {
     height: 100px;
 
     border-radius: 5px;
-    border-style: none;
+    border-style: solid;
+    border-width: 1px;
     padding: 10px;
     box-sizing: border-box;
 
@@ -30,22 +32,31 @@ body {
     cursor: pointer;
 
     font-size: 20px;
+
+    background-color: var(--bg-color);
 }
 
 #button-load-event {
-    background-color: #ccffcc;
+    --bg-color: #ccffcc;
 }
 
-#button-load-event:hover {
-    background-color: #bbffbb;
+#button-unload-event {
+    --bg-color: #ffffcc;
 }
 
 #button-retry-data {
-    background-color: #ffcccc;
+    --bg-color: #ffcccc;
 }
 
-#button-retry-data:hover {
-    background-color: #ffbbbb;
+@supports (background-color: hsl(from var(--bg-color) h s calc(l - 5))){
+    .button:hover {
+        background-color: hsl(from var(--bg-color) h s calc(l - 5));
+    }
+}
+@supports not (background-color: hsl(from var(--bg-color) h s calc(l - 5))){
+    .button:hover {
+        filter: contrast(80%)
+    }
 }
 
 #status {
@@ -68,4 +79,8 @@ body {
 
 .error-message {
     color: red;
+}
+
+bold {
+    font-weight: bolder;
 }
