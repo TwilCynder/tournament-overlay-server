@@ -7,6 +7,12 @@ import { playerString } from "./findPlayer.js";
 import { getEventFromTSH } from "../common/getEventFromTSH.js";
 import { EventEmitter } from "events"
 
+export class ServerStateError extends HTTPServerError {
+    constructor(cause, userMesssage, ...msg){
+        super(500, cause, "This operation cannot be done in this state : " + userMesssage, ...msg);
+    }
+}
+
 export class DataManager extends EventEmitter {
     /** @type {import("../common/types.js").Data?} */
     #data;
@@ -47,7 +53,7 @@ export class DataManager extends EventEmitter {
      */
     #loadForEvent(eventSlug){
         return this.#loadForEvent_(eventSlug).then(result => {
-            this.emit("dataLoaded", result, this.#data);
+            this.emit("dataChanged");
             return result;
         });
     }
@@ -58,7 +64,7 @@ export class DataManager extends EventEmitter {
      */
     loadCurrentEvent(){
         if (!this.#event){
-            throw new HTTPServerError(500, null, "Cannot retry loading, no event has been selected")
+            throw new ServerStateError(null, "Cannot retry loading, no event has been selected")
         }
 
         return this.#loadForEvent(this.#event);
@@ -75,6 +81,13 @@ export class DataManager extends EventEmitter {
         return await this.#loadForEvent(eventURL)
     }
 
+    unloadEvent(){
+        if (!this.#event) throw new ServerStateError(null, "No event selected");
+        this.#event = null;
+        this.#data = null;
+        this.emit("dataChanged");
+    }
+
     getEvent(){
         return this.#event;
     }
@@ -84,7 +97,7 @@ export class DataManager extends EventEmitter {
     }
 
     getData(){
-        if (!this.#data) throw new HTTPServerError(500, "Data has not been loaded yet");
+        if (!this.#data) throw new ServerStateError("Data has not been loaded yet");
         return this.#data;
     }
 

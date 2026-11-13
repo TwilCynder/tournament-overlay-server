@@ -26,7 +26,8 @@ const contentSwitcher = new ContentSwitcher(document.querySelector(".panel.initi
  * type {{[name: string]: Operation}}
  */
 const operations = {
-    loadEventFromTSH: {name: "Load event from TSH", body: () => ({op: "load-data", url: null})}
+    loadEventFromTSH: {name: "Load event from TSH", body: () => ({op: "load-data", url: null})},
+    unloadEvent: {name: "Unselect event", body: () => ({op: "reset"})}
 }
 
 /** @type {Operation?} */
@@ -91,4 +92,7 @@ function sendCommand(ws, op, ...args){
 
 document.getElementById("button-load-event").onclick = () => {
     sendCommand(ws, operations.loadEventFromTSH);
+}
+document.getElementById("button-unload-event").onclick = () => {
+    sendCommand(ws, operations.unloadEvent);
 }

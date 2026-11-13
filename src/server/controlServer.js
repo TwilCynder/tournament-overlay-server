@@ -72,6 +72,7 @@ export function initWS(wss, dataManager){
                 let msg = JSON.parse(rawMsg.toString());
                 console.log(msg);
 
+                let processed = false;
                 switch (msg.op){
                     case "load-data":
                         dataManager.load(msg.url).then((success) => {
@@ -80,18 +81,23 @@ export function initWS(wss, dataManager){
                         break;
                     case "retry-load-data":
                         break;
+                    case "reset": 
+                        dataManager.unloadEvent();
+                        sendOperationFeedback(ws, "success");
+                        processed = true;
+                        break;
                 }
 
-                sendOperationFeedback(ws, "ok");
+                if (!processed) sendOperationFeedback(ws, "ok");
             } catch (err) {
                 handleWSServerError(ws, err)
             }
         })
 
-        sendJSON(ws, getStatus(dataManager));
+        sendStatus(ws, getStatus(dataManager));
     })
 
-    dataManager.addListener("dataLoaded", () => {
+    dataManager.addListener("dataChanged", () => {
         const status = getStatus(dataManager);
         for (const ws of wss.clients){
             sendStatus(ws, status);

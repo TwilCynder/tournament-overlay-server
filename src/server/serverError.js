@@ -6,7 +6,9 @@ import { FormattableError, printError } from "../common/error.js";
  */
 export class ServerError extends FormattableError {
     constructor(cause, userMesssage, ...msg){
-        if (msg.length == 0) msg[0] = userMesssage;
+        //if (msg.length == 0) msg[0] = userMesssage;
+        if (msg.length > 0) msg.unshift("-"); //le message final sera (userMessage, ...msg) ; si il y a bien un msg, on insère un - entre la partie user et la partie additionnelle
+        msg.unshift(userMesssage);
         if (cause instanceof ServerError) userMesssage += " : " + cause.userMesssage;
         super(cause, ...msg);
         this.userMesssage = userMesssage;
