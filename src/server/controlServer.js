@@ -80,6 +80,9 @@ export function initWS(wss, dataManager){
                         });
                         break;
                     case "retry-load-data":
+                        dataManager.loadCurrentEvent().then((success) => {
+                            sendOperationFeedback(ws, "success", "Loaded event from TSH ; data file " + (success ? "loaded" : "not found"));
+                        })
                         break;
                     case "reset": 
                         dataManager.unloadEvent();

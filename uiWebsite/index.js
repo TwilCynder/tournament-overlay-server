@@ -14,7 +14,7 @@ const ws = new WebSocket(url);
 const PANELS = {
     nothingLoaded: document.getElementById("nothing-loaded"),
     eventSelected: document.getElementById("event-selected"),
-
+    dataLoaded: document.getElementById("data-loaded")
 }
 const statusElement = document.getElementById("status");
 const feedbackElement = document.getElementById("feedback");
@@ -63,6 +63,8 @@ function processStatusMessage(message){
             statusElement.innerHTML = `Event selected : ${message.slug} <br> No data loaded`;
             break;
         case "data-loaded":
+            contentSwitcher.showElement(PANELS.dataLoaded);
+            //statusElement.innerHTML = `Data loaded : `
             break;
     }
 }
