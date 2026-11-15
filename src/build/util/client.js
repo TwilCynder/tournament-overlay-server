@@ -13,7 +13,10 @@ function buildURL(url){
 async function SGGOGToken(sggog_addr){
     const url = buildURL(sggog_addr);
 
-    const res = await fetch(url);
+    const res = await fetch(url).catch(err => {
+        throw err;
+    });
+
     if (!res.ok){
         const data = await res.json().catch(_ => ({err: null}))
         throw NoCauseFormattableError("Request to SGGOG at URL", url, "failed with code", res.status, data.err ? ": " + data.err : "");
@@ -37,8 +40,10 @@ export async function createClientAuto(sggog_addr){
 
             console.log("Token obtained from SGGOG");
         } catch (err){
-            if (err instanceof FormattableError) error(5, "Could not obtain token from SGGOG :", ...err.msgParts);
-            error(5, "Error while fetching token from SGGOG :", err);
+            if (err.cause && err.cause.code == "ECONNREFUSED"){
+                throw "couldn't connect to SGGOG at " + sggog_addr + " - check that SGGOG is running and that you have the right port/host";
+            }
+            error(5, "Could not obtain token from SGGOG :", err);
         }
 
     } else {

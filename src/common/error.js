@@ -39,17 +39,20 @@ export class FormattableError extends Error {
     constructor(cause, ...msgParts){
         if (cause && msgParts.length < 1){
             msgParts.push(cause);
-            cause = null;
+            cause = undefined;
         }
         
+        if (cause instanceof FormattableError) msgParts = msgParts.concat([":", cause.#fmtMsg]);
         super(msgParts.join(" "), {cause});
-        let fmtMsg = msgParts.map(formatMsgPart).join(" ");
-        if (cause instanceof FormattableError) fmtMsg += " : " + cause.fmtMsg;
-        this.#fmtMsg = fmtMsg;
+        this.#fmtMsg = msgParts.map(formatMsgPart).join(" ");
+    }
+
+    getFormattedMessage(){
+        return this.#fmtMsg;
     }
 
     toFormatString(){
-        return this.#fmtMsg + "\n" + util.inspect(this);
+        return this.#fmtMsg + "\n" + "----------------" + '\n' + util.inspect(this);
     }
 }
 
