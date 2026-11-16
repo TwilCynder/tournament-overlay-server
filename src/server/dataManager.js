@@ -6,6 +6,7 @@ import { getSlugAndFilename } from "../common/slug.js";
 import { playerString } from "./findPlayer.js";
 import { getEventFromTSH } from "../common/getEventFromTSH.js";
 import { EventEmitter } from "events"
+import { build } from "../build/build.js";
 
 export class ServerStateError extends HTTPServerError {
     constructor(cause, userMesssage, ...msg){
@@ -13,15 +14,21 @@ export class ServerStateError extends HTTPServerError {
     }
 }
 
+const DEFAULT_SGG_CONFIG = {sggog_addr: "", fast_mode: false}
+
 export class DataManager extends EventEmitter {
     /** @type {import("../common/types.js").Data?} */
     #data;
     /** @type {string?} */
     #event;
 
-    constructor(){
+    #sggConfig = DEFAULT_SGG_CONFIG;
+
+    /** @param {Partial<typeof DEFAULT_SGG_CONFIG>} apiConfig  */
+    constructor(apiConfig){
         super();
         this.#data = null;
+        this.setSGGConfig(apiConfig);
     }
 
     /**
@@ -58,14 +65,21 @@ export class DataManager extends EventEmitter {
         });
     }
 
+    build(){
+        if (!this.#event) throw new ServerStateError(null, "Cannot build data, no event has been selected");
+
+        return build(this.#event, {}).then((result) => {
+            this.emit("dataChanged");
+            return result;
+        });
+    }
+
     /**
      * Tries loading a data file for the currently selected event
      * @returns 
      */
     loadCurrentEvent(){
-        if (!this.#event){
-            throw new ServerStateError(null, "Cannot retry loading, no event has been selected")
-        }
+        if (!this.#event) throw new ServerStateError(null, "Cannot retry loading, no event has been selected");
 
         return this.#loadForEvent(this.#event);
     }
@@ -86,6 +100,11 @@ export class DataManager extends EventEmitter {
         this.#event = null;
         this.#data = null;
         this.emit("dataChanged");
+    }
+
+    /** @param {Partial<typeof DEFAULT_SGG_CONFIG>} config  */
+    setSGGConfig(config = {}){
+        Object.assign(this.#sggConfig, config);
     }
 
     getEvent(){

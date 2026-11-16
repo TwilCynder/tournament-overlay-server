@@ -1,23 +1,20 @@
 import { ArgumentsManager } from "@twilcynder/arguments-parser";
-import { joinPath, readJSON } from "./src/build/util/io.js";
 import fs from "fs/promises";
 
-import { build } from "./src/build.js";
+import { build } from "./src/build/build.js";
 import { getSlugAndFilename } from "./src/common/slug.js";
 import { error } from "./src/common/error.js";
 import { getEventFromTSH } from "./src/common/getEventFromTSH.js";
+import { addSGGParams, getSggogAddress } from "./src/build/util/sggParams.js";
 
 let {event, sggog_addr, sggog_addr_default, slow_mode} = new ArgumentsManager()
     .setParameters({guessLowDashes: true})
     .addOption(["-e", "--event"], {description: "URL of the event to load H2H for. Defaults to the one selected in TSH"}, true)
-    .addOption(["-a", "--sggog-addr"], {description: "Address at which to find startgg-oauth-gate ; will be used to find a token if specified, unless one is already present in the environment variables"}, true)
-    .addSwitch(["-A", "--sggog-addr-default"], {description: "Use the default address, localhost:54301, to find startgg-ouauth-gate"}, true)
-    .addSwitch(["-S", "--slow-mode"], {description: "Sends only one request at a time ; slower, but lower risk of failing whe start.gg's API backend is struggling"})
+    .apply(addSGGParams)
     .enableHelpParameter()
     .parseProcessArguments()
 
-sggog_addr = sggog_addr ?? (sggog_addr_default ? "localhost:54301" : null) ?? process.env.SGGOG_ADDR;
-
+sggog_addr = getSggogAddress(sggog_addr, sggog_addr_default);
 
 event = await getEventFromTSH(event).catch(err => error(3, err));
 

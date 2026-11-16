@@ -67,7 +67,7 @@ export async function getPlayersSetsFactory(queryManager = new QueryManager){
      * @returns {import("../common/types.js").Set[]}
      */
     return function getPlayerSets(client, id, limiter){
-        return query.executePaginated(client, {id}, "player.sets", limiter, /*{maxElements: 100}*/)
+        return query.executePaginated(client, {id}, "player.sets", limiter, /*{maxElements: 100}*/ {}, true)
             .catch(err => {
                 throw new FormattableError(err, "Could not fetch sets for player", id);
             })

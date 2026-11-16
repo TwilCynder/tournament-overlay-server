@@ -1,17 +1,16 @@
 import { DelayQueryLimiter } from "startgg-helper-node";
-import { QueryManager } from "./build/util/queryManager.js";
-import { createClientAuto } from "./build/util/client.js";
-import { getEventInfoFactory } from "./build/getEventEntrants.js";
-import { getPlayersDataFactory } from "./build/playerData.js";
-import { buildMatchesMatrix } from "./build/head2headMatrix.js";
-import { durationString } from "./build/util/timeString.js";
+import { QueryManager } from "./util/queryManager.js";
+import { createClientAuto } from "./util/client.js";
+import { getEventInfoFactory } from "./getEventEntrants.js";
+import { getPlayersDataFactory } from "./playerData.js";
+import { buildMatchesMatrix } from "./head2headMatrix.js";
+import { durationString } from "./util/timeString.js";
 
 /**
  * TODO : callbacks
  * @param {string} eventSlug Event slug
  * @param {Object} config 
  * @param {string} config.sggog_addr Address for SGGOG
- * @param {boolean} config.silentQueries 
  * @param {boolean} config.slowMode Send only one request at a time 
  */
 export async function build(eventSlug, config){
@@ -49,9 +48,12 @@ export async function build(eventSlug, config){
 
     delete eventData.players;
 
+    const timestamp = Date.now();
+
     return {
         matrix, players,
         eventSlug,
-        event: eventData.event
+        event: eventData.event,
+        timestamp
     }
 }

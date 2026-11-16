@@ -5,16 +5,18 @@ import { dataRouter } from "./src/server/dataServer.js";
 import { WebSocketServer } from "ws";
 import { createServer } from "http"
 import { initWS } from "./src/server/controlServer.js";
+import { addSGGParams, getSggogAddress } from "./src/build/util/sggParams.js";
 
-let {event, load, port} = new ArgumentsManager()
+let {event, load, port, sggog_addr, sggog_addr_default, slow_mode} = new ArgumentsManager()
     .setParameters({guessLowDashes: true})
     .addOption(["-e", "--event"], {description: "URL of the event to load H2H for. Defaults to the one selected in TSH"}, true)
     .addSwitch(["-l", "--load"], {description: "Try loading data right away"})
     .addOption(["-p", "--port"], {description: "Port to listen to", type: "number"})
+    .apply(addSGGParams)
     .enableHelpParameter()
     .parseProcessArguments()
 
-const dm = new DataManager();
+const dm = new DataManager({sggog_addr: getSggogAddress(sggog_addr, sggog_addr_default), fast_mode: !slow_mode});
 dm.on("dataLoaded", (success, data) => {
     if (success) console.log("Successfully loaded data for event", data.event, "with", data.players.length, "players");
     else console.log("No data to load for event", dm.getEvent());
