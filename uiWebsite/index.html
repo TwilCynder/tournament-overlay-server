@@ -7,15 +7,34 @@
     <body>
         <div id="status">No event selected</div>
         <div class="panels-container">
-            <div class="panel initial" id="nothing-loaded">
-                <div class="button" id="button-load-event">Load Event From TSH</div>
+            <div class="button-board panel initial">Connecting ...</div>
+            <div class="button-board panel" id="nothing-loaded">
+                <div class="button normal-button clickable" id="button-load-event">Load Event From TSH</div>
             </div>
-            <div class="panel" id="event-selected">
-                <div class="button" id="button-unload-event">Reset</div>
-                <div class="button" id="button-retry-data">Retry loading data</div>
+            <div class="button-board panel" id="event-selected">
+                <div class="button normal-button clickable" id="button-unload-event">Reset</div>
+                <div class="button normal-button clickable" id="button-retry-data">Retry loading data</div>
+                <div class="button form-button" id="button-build-data">
+                    <div class="button-fragment form-button-title clickable">Build data</div>
+                    <div class="form-button-arrow clickable">></div>
+                    <div class="button-form-container">
+                        <div class="button-form">
+                            <div class="form-line">
+                                <label for="sggog_addr">SGGOG Address</label>
+                                <input type="text" name="sggog_addr" id="form-sggog-addr" size="20">
+                            </div>
+                            <div class="form-line">
+                                <label for="sggog_addr">Fast mode</label>
+                                <input type="checkbox" name="api-fast-mode" id="form-api-fast-mode" size="20">
+                            </div>
+                        </div>
+                        <div class="form-x-column"><div class="clickable"><div class="form-x "></div></div></div>
+                    </div>
+                    
+                </div>
             </div>
-            <div class="panel" id="data-loaded">
-                <div class="button" id="button-unload-event">Reset</div>
+            <div class="button-board panel" id="data-loaded">
+                <div class="button" id="button normal-button clickable">Reset</div>
             </div>
         </div>
         <div class="feedback-container">

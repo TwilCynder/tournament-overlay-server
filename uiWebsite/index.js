@@ -1,4 +1,4 @@
-import { ContentSwitcher } from "./src/DOMUtil.js";
+import { ContentSwitcher, showElement } from "./src/DOMUtil.js";
 import { sendJSON } from "./src/WSUtil.js";
 
 /**
@@ -98,3 +98,9 @@ document.getElementById("button-load-event").onclick = () => {
 document.getElementById("button-unload-event").onclick = () => {
     sendCommand(ws, operations.unloadEvent);
 }
+document.querySelectorAll(".form-button-arrow").forEach(element => element.onclick = () => {
+    element.parentElement.classList.toggle("expanded");
+})
+document.querySelectorAll(".form-x-column .clickable").forEach(element => element.onclick = () => {
+    element.closest(".form-button").classList.toggle("expanded");
+})
