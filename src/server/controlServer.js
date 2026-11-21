@@ -48,6 +48,17 @@ function handleWSServerError(ws, err){
     printError("Error while processing WS request :", err);
 }
 
+/** @param {WebSocket} ws @param {Promise<unknown>} promise  */
+function handleAsyncTask(ws, promise){
+    return promise.catch(handleWSServerError.bind(null, ws));
+}
+
+/** @param {WebSocket} ws @param {() => Promise<unknown>} f  */
+function runAsyncTask(ws, f){
+    sendOperationFeedback(ws, "ok");
+    return handleAsyncTask(ws, f());
+}
+
 /** @param {string?} slug @param {ReturnType<import("./dataManager.js").DataManager['tryGetData']>} data   @returns {import("./wsProtocol").Status}*/
 function getStatus(slug, data){
     console.log(slug, data)
@@ -77,33 +88,32 @@ export function initWS(wss, dataManager){
                 let msg = JSON.parse(rawMsg.toString());
                 console.log(msg);
 
-                const errHandler = handleWSServerError.bind(null, ws);
-
-                let processed = false;
                 switch (msg.op){
                     case "load-data":
-                        dataManager.load(msg.url).then((success) => {
+                        runAsyncTask(ws, async() => {
+                            const success = await dataManager.load(msg.url);
+                            if (success == null) throw "Data was already loaded";
                             sendOperationFeedback(ws, "success", "Loaded event from TSH ; data file " + (success ? "loaded" : "not found"));
-                        }).catch(errHandler);
+                        });          
                         break;
                     case "retry-load-data":
-                        dataManager.loadCurrentEvent().then((success) => {
-                            sendOperationFeedback(ws, "success", "Loaded event from TSH ; data file " + (success ? "loaded" : "not found"));
-                        }).catch(errHandler);
+                        runAsyncTask(ws, async () => {
+                            const success = await dataManager.loadCurrentEvent();
+                            if (success == null) throw "Data was already loaded";
+                            sendOperationFeedback(ws, "success", success ? "Data loaded" : "Still not data");
+                        });
                         break;
                     case "build-data":
-                        dataManager.build({sggog_addr: msg.sggog_addr, slow_mode: !msg.fast_mode}).then(() => {
+                        runAsyncTask(ws, async () => {
+                            await dataManager.build({slow_mode: !msg.fast_mode});
                             sendOperationFeedback(ws, "success");
-                        }).catch(errHandler);
+                        });
                         break;
                     case "reset": 
                         dataManager.unloadEvent();
                         sendOperationFeedback(ws, "success");
-                        processed = true;
                         break;
                 }
-
-                if (!processed) sendOperationFeedback(ws, "ok");
             } catch (err) {
                 handleWSServerError(ws, err)
             }
