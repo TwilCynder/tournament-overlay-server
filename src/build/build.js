@@ -11,7 +11,7 @@ import { durationString } from "./util/timeString.js";
  * @param {string} eventSlug Event slug
  * @param {Object} config 
  * @param {string} config.sggog_addr Address for SGGOG
- * @param {boolean} config.slowMode Send only one request at a time 
+ * @param {boolean} config.slow_mode Send only one request at a time 
  */
 export async function build(eventSlug, config){
     const qm = new QueryManager;

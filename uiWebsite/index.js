@@ -27,7 +27,8 @@ const contentSwitcher = new ContentSwitcher(document.querySelector(".panel.initi
  */
 const operations = {
     loadEventFromTSH: {name: "Load event from TSH", body: () => ({op: "load-data", url: null})},
-    unloadEvent: {name: "Unselect event", body: () => ({op: "reset"})}
+    unloadEvent: {name: "Unselect event", body: () => ({op: "reset"})},
+    buildData: {name: "Build data", body: (fast_mode, sggog_addr) => ({op: "build-data", sggog_addr, fast_mode})}
 }
 
 /** @type {Operation?} */
@@ -98,8 +99,14 @@ document.getElementById("button-load-event").onclick = () => {
 document.getElementById("button-unload-event").onclick = () => {
     sendCommand(ws, operations.unloadEvent);
 }
+document.querySelector("#button-build-data .form-button-title").onclick = () => {
+    sendCommand(ws, operations.buildData, 
+        document.getElementById("form-api-fast-mode").checked,
+        document.getElementById("form-sggog-addr").value
+    )
+}
 document.querySelectorAll(".form-button-arrow").forEach(element => element.onclick = () => {
-    element.parentElement.classList.toggle("expanded");
+    element.closest(".form-button").classList.toggle("expanded");
 })
 document.querySelectorAll(".form-x-column .clickable").forEach(element => element.onclick = () => {
     element.closest(".form-button").classList.toggle("expanded");

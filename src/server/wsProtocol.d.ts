@@ -1,6 +1,7 @@
 export type WSControlMessageIncoming = 
     {op: "load-data", url?: string} | 
     {op: "retry-load-data"} |
+    {op: "build-data", sggog_addr: string?, fast_mode: boolean?} |
     {op: "reset"}
 
 export type OperationFeedbackStatus = "error" | "ok" | "success";

@@ -11,7 +11,8 @@ Rewrite typescript : fonctions créant les objets message ; le type sera dériv�
 */
 
 import { WebSocketServer } from "ws";
-import { FormattableError } from "../common/error.js";
+import { FormattableError, printError } from "../common/error.js";
+import { getServerErrorMessage } from "./serverError.js";
 
 /** @param {WebSocket} ws @param {*} obj  */
 function sendJSON(ws, obj){
@@ -47,15 +48,19 @@ function handleWSServerError(ws, err){
     printError("Error while processing WS request :", err);
 }
 
-/** @param {import("./dataManager.js").DataManager} dm @returns {import("./wsProtocol").Status}*/
-function getStatus(dm){
-    const slug = dm.getEvent();
+/** @param {string?} slug @param {ReturnType<import("./dataManager.js").DataManager['tryGetData']>} data   @returns {import("./wsProtocol").Status}*/
+function getStatus(slug, data){
+    console.log(slug, data)
     if (!slug) return {mode: "nothing-loaded"};
 
-    const data = dm.tryGetData();
     return data ?
         {mode: "data-loaded", slug, numEntrants: data.players.length} : 
         {mode: "event-set", slug} 
+}
+
+/** @param {import("./dataManager.js").DataManager} dm  */
+function getDMStatus(dm){
+    return getStatus(dm.getEvent(), dm.tryGetData());
 }
 
 /**
@@ -72,17 +77,24 @@ export function initWS(wss, dataManager){
                 let msg = JSON.parse(rawMsg.toString());
                 console.log(msg);
 
+                const errHandler = handleWSServerError.bind(null, ws);
+
                 let processed = false;
                 switch (msg.op){
                     case "load-data":
                         dataManager.load(msg.url).then((success) => {
                             sendOperationFeedback(ws, "success", "Loaded event from TSH ; data file " + (success ? "loaded" : "not found"));
-                        });
+                        }).catch(errHandler);
                         break;
                     case "retry-load-data":
                         dataManager.loadCurrentEvent().then((success) => {
                             sendOperationFeedback(ws, "success", "Loaded event from TSH ; data file " + (success ? "loaded" : "not found"));
-                        })
+                        }).catch(errHandler);
+                        break;
+                    case "build-data":
+                        dataManager.build({sggog_addr: msg.sggog_addr, slow_mode: !msg.fast_mode}).then(() => {
+                            sendOperationFeedback(ws, "success");
+                        }).catch(errHandler);
                         break;
                     case "reset": 
                         dataManager.unloadEvent();
@@ -97,11 +109,11 @@ export function initWS(wss, dataManager){
             }
         })
 
-        sendStatus(ws, getStatus(dataManager));
+        sendStatus(ws, getDMStatus(dataManager));
     })
 
-    dataManager.addListener("dataChanged", () => {
-        const status = getStatus(dataManager);
+    dataManager.addListener("dataChanged", (slug, data) => {
+        const status = getStatus(slug, data);
         for (const ws of wss.clients){
             sendStatus(ws, status);
         }

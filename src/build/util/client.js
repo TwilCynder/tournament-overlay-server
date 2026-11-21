@@ -1,6 +1,7 @@
 import { createClient } from "startgg-helper-node";
 import { error } from "../../common/error.js";
 import { FormattableError, NoCauseFormattableError } from "../../common/error.js";
+import { BuildError } from "./buildError.js";
 
 /** @param {string | number} url  */
 function buildURL(url){
@@ -43,11 +44,11 @@ export async function createClientAuto(sggog_addr){
             if (err.cause && err.cause.code == "ECONNREFUSED"){
                 throw "couldn't connect to SGGOG at " + sggog_addr + " - check that SGGOG is running and that you have the right port/host";
             }
-            error(5, "Could not obtain token from SGGOG :", err);
+            throw new FormattableError(err, "Could not obtain token from SGGOG");
         }
 
     } else {
-        error(1, "Could not find a token - SGGOG is disabled, use -a or -A")
+        throw new BuildError(1, null, "Could not find a token - SGGOG is disabled, use -a or -A")
     }
 
     return createClient(token);

@@ -7,6 +7,7 @@ import { playerString } from "./findPlayer.js";
 import { getEventFromTSH } from "../common/getEventFromTSH.js";
 import { EventEmitter } from "events"
 import { build } from "../build/build.js";
+import { defaults } from "../common/jsUtil.js";
 
 export class ServerStateError extends HTTPServerError {
     constructor(cause, userMesssage, ...msg){
@@ -14,7 +15,8 @@ export class ServerStateError extends HTTPServerError {
     }
 }
 
-const DEFAULT_SGG_CONFIG = {sggog_addr: "", fast_mode: false}
+const DEFAULT_SGG_CONFIG = {sggog_addr: "", slow_mode: true}
+/** @typedef {typeof DEFAULT_SGG_CONFIG} SGGConfig */
 
 export class DataManager extends EventEmitter {
     /** @type {import("../common/types.js").Data?} */
@@ -24,11 +26,15 @@ export class DataManager extends EventEmitter {
 
     #sggConfig = DEFAULT_SGG_CONFIG;
 
-    /** @param {Partial<typeof DEFAULT_SGG_CONFIG>} apiConfig  */
+    /** @param {Partial<SGGConfig>} apiConfig  */
     constructor(apiConfig){
         super();
         this.#data = null;
         this.setSGGConfig(apiConfig);
+    }
+
+    #onDataChanged(){
+        this.emit("dataChanged", this.#event, this.#data);
     }
 
     /**
@@ -37,6 +43,7 @@ export class DataManager extends EventEmitter {
      */
     async #loadForEvent_(eventURL){
         const [slug, filenename] = getSlugAndFilename(eventURL);
+        if (!this.#event == slug && this.#data) return null;
         this.#event = slug;
 
         /** @type {import("../common/types.js").Data} */
@@ -55,21 +62,26 @@ export class DataManager extends EventEmitter {
     }
 
     /**
-     * Loads data for the specified event, assuming that the slug is non-null. Fires a dataLoaded event with the result
+     * Loads data for the specified event, assuming that the slug is non-null.
      * @param {string} eventSlug 
      */
     #loadForEvent(eventSlug){
         return this.#loadForEvent_(eventSlug).then(result => {
-            this.emit("dataChanged");
+            this.#onDataChanged();
+            if (result) console.log("Successfully loaded data for event", this.#event, "with", this.#data.players.length, "players");
+            else if (result == false) console.log("No data to load for event", this.#event);
             return result;
         });
     }
 
-    build(){
+    /** @param {Partial<SGGConfig>} config  */
+    build(config){
         if (!this.#event) throw new ServerStateError(null, "Cannot build data, no event has been selected");
 
-        return build(this.#event, {}).then((result) => {
-            this.emit("dataChanged");
+        config = defaults(config, DEFAULT_SGG_CONFIG);
+
+        return build(this.#event, {slow_mode: config.slow_mode, sggog_addr: DEFAULT_SGG_CONFIG.sggog_addr}).then((result) => {
+            this.#onDataChanged();
             return result;
         });
     }
@@ -91,7 +103,6 @@ export class DataManager extends EventEmitter {
      */
     async load(eventURL){
         eventURL = await getEventFromTSH(eventURL);
-
         return await this.#loadForEvent(eventURL)
     }
 
@@ -99,12 +110,15 @@ export class DataManager extends EventEmitter {
         if (!this.#event) throw new ServerStateError(null, "No event selected");
         this.#event = null;
         this.#data = null;
-        this.emit("dataChanged");
+        this.#onDataChanged();
+
+        console.log("Unloaded event");
     }
 
     /** @param {Partial<typeof DEFAULT_SGG_CONFIG>} config  */
     setSGGConfig(config = {}){
         Object.assign(this.#sggConfig, config);
+        console.log("New SGG config :", this.#sggConfig)
     }
 
     getEvent(){

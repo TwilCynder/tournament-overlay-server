@@ -6,6 +6,7 @@ import { getSlugAndFilename } from "./src/common/slug.js";
 import { error } from "./src/common/error.js";
 import { getEventFromTSH } from "./src/common/getEventFromTSH.js";
 import { addSGGParams, getSggogAddress } from "./src/build/util/sggParams.js";
+import { BuildError } from "./src/build/util/buildError.js";
 
 let {event, sggog_addr, sggog_addr_default, slow_mode} = new ArgumentsManager()
     .setParameters({guessLowDashes: true})
@@ -25,7 +26,7 @@ try {
     error(2, err.message)
 }
 
-const data = await build(event, {sggog_addr, slowMode: slow_mode}).catch(err => error(5, "Error while building the data :", err));
+const data = await build(event, {sggog_addr, slow_mode}).catch(err => error(err instanceof BuildError ? err.getCode() : 5, "Error while building the data :", err));
 
 const {matrix, players} = data;
 for (const playerData of players){

@@ -16,11 +16,8 @@ let {event, load, port, sggog_addr, sggog_addr_default, slow_mode} = new Argumen
     .enableHelpParameter()
     .parseProcessArguments()
 
-const dm = new DataManager({sggog_addr: getSggogAddress(sggog_addr, sggog_addr_default), fast_mode: !slow_mode});
-dm.on("dataLoaded", (success, data) => {
-    if (success) console.log("Successfully loaded data for event", data.event, "with", data.players.length, "players");
-    else console.log("No data to load for event", dm.getEvent());
-})
+const dm = new DataManager({sggog_addr: getSggogAddress(sggog_addr, sggog_addr_default), slow_mode});
+
 
 if (event || load){
     dm.load(event);
