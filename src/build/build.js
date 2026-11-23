@@ -1,6 +1,5 @@
-import { DelayQueryLimiter } from "startgg-helper-node";
+import { DelayQueryLimiter, TimedQuerySemaphore } from "startgg-helper-node";
 import { QueryManager } from "./util/queryManager.js";
-import { createClientAuto } from "./util/client.js";
 import { getEventInfoFactory } from "./getEventEntrants.js";
 import { getPlayersDataFactory } from "./playerData.js";
 import { buildMatchesMatrix } from "./head2headMatrix.js";
@@ -9,18 +8,16 @@ import { durationString } from "./util/timeString.js";
 /**
  * TODO : callbacks
  * @param {string} eventSlug Event slug
+ * @param {TimedQuerySemaphore} limiter 
  * @param {Object} config 
- * @param {string} config.sggog_addr Address for SGGOG
  * @param {boolean} config.slow_mode Send only one request at a time 
  */
-export async function build(eventSlug, config){
+export async function build(client, eventSlug, limiter, config){
     const qm = new QueryManager;
-    const [client, getEventInfo, getPlayersData] = await Promise.all([
-        createClientAuto(config.sggog_addr), 
+    const [getEventInfo, getPlayersData] = await Promise.all([
         getEventInfoFactory(qm),
         getPlayersDataFactory(qm)]
     );
-    const limiter = new DelayQueryLimiter(60);
 
     console.log("Loading entrants for event", eventSlug);
 

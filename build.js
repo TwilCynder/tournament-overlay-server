@@ -7,6 +7,8 @@ import { error } from "./src/common/error.js";
 import { getEventFromTSH } from "./src/common/getEventFromTSH.js";
 import { addSGGParams, getSggogAddress } from "./src/build/util/sggParams.js";
 import { BuildError } from "./src/build/util/buildError.js";
+import { tryCreateClient } from "./src/build/util/client.js";
+import { StartGGDelayQueryLimiter } from "startgg-helper-node";
 
 let {event, sggog_addr, sggog_addr_default, slow_mode} = new ArgumentsManager()
     .setParameters({guessLowDashes: true})
@@ -26,7 +28,11 @@ try {
     error(2, err.message)
 }
 
-const data = await build(event, {sggog_addr, slow_mode}).catch(err => error(err instanceof BuildError ? err.getCode() : 5, "Error while building the data :", err));
+const client = tryCreateClient(sggog_addr);
+if (!client) error(1, "Could not find a token - use SGGOG and enable it with -a or -A, or pass a STARTGG_API_TOKEN env variable");
+const limiter = new StartGGDelayQueryLimiter;
+
+const data = await build(client, event, limiter, {slow_mode}).catch(err => error(err instanceof BuildError ? err.getCode() : 5, "Error while building the data :", err));
 
 const {matrix, players} = data;
 for (const playerData of players){

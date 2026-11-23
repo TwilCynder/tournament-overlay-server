@@ -43,9 +43,9 @@ function setFeedbackContent(message, cssClass = ""){
 function processFeedbackResponse(res){
     switch (res.status){
         case "error": 
-            return [res.message ?? "Error", "error-message"]; //ajouter decoration ou jsp
+            return [res.message ?? "Error", "error-message"];
         case "ok":
-            return ["Server processing request ..."];
+            return [res.message ?? "Server processing request ..."];
         case "success":
             return [res.message ?? "Success", "success-message"];
     }

@@ -9,7 +9,9 @@ export class ServerError extends FormattableError {
         //if (msg.length == 0) msg[0] = userMesssage;
         if (msg.length > 0) msg.unshift("-"); //le message final sera (userMessage, ...msg) ; si il y a bien un msg, on insère un - entre la partie user et la partie additionnelle
         msg.unshift(userMesssage);
+        userMesssage == userMesssage ?? "Unknown Error";
         if (cause instanceof ServerError) userMesssage += " : " + cause.userMesssage;
+        if (typeof cause == "string") userMesssage += " : " + cause;
         super(cause, ...msg);
         this.userMesssage = userMesssage;
     }

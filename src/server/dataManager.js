@@ -8,6 +8,7 @@ import { getEventFromTSH } from "../common/getEventFromTSH.js";
 import { EventEmitter } from "events"
 import { build } from "../build/build.js";
 import { defaults } from "../common/jsUtil.js";
+import { APIManager } from "./util/APIManager.js";
 
 export class ServerStateError extends HTTPServerError {
     constructor(cause, userMesssage, ...msg){
@@ -15,22 +16,18 @@ export class ServerStateError extends HTTPServerError {
     }
 }
 
-const DEFAULT_SGG_CONFIG = {sggog_addr: "", slow_mode: true}
-/** @typedef {typeof DEFAULT_SGG_CONFIG} SGGConfig */
-
 export class DataManager extends EventEmitter {
     /** @type {import("../common/types.js").Data?} */
     #data;
     /** @type {string?} */
     #event;
 
-    #sggConfig = DEFAULT_SGG_CONFIG;
+    #apiManager;
 
-    /** @param {Partial<SGGConfig>} apiConfig  */
-    constructor(apiConfig){
+    constructor(){
         super();
         this.#data = null;
-        this.setSGGConfig(apiConfig);
+        this.#apiManager = new APIManager;
     }
 
     #onDataChanged(){
@@ -74,13 +71,26 @@ export class DataManager extends EventEmitter {
         });
     }
 
-    /** @param {Partial<SGGConfig>} config  */
-    build(config){
+    /** @param {string?} sggog_addr  */
+    initSGGAPI(sggog_addr){
+        return this.#apiManager.initClient(sggog_addr);
+    }
+
+    /** @param {string} sggog_addr  */
+    async reinitSGGAPI(sggog_addr){
+        const resMsg = await this.#apiManager.reinitClient(sggog_addr);
+        console.log(resMsg);
+        return resMsg;
+    }
+
+    /** @param {boolean} fast_mode */
+    build(fast_mode){
         if (!this.#event) throw new ServerStateError(null, "Cannot build data, no event has been selected");
 
-        config = defaults(config, DEFAULT_SGG_CONFIG);
+        const limiter = this.#apiManager.getLimiter();
+        const client = this.#apiManager.getClient();
 
-        return build(this.#event, {slow_mode: config.slow_mode, sggog_addr: DEFAULT_SGG_CONFIG.sggog_addr}).then((result) => {
+        return build(client, this.#event, limiter, {slow_mode: !fast_mode}).then((result) => {
             this.#onDataChanged();
             return result;
         });
@@ -113,12 +123,6 @@ export class DataManager extends EventEmitter {
         this.#onDataChanged();
 
         console.log("Unloaded event");
-    }
-
-    /** @param {Partial<typeof DEFAULT_SGG_CONFIG>} config  */
-    setSGGConfig(config = {}){
-        Object.assign(this.#sggConfig, config);
-        console.log("New SGG config :", this.#sggConfig)
     }
 
     getEvent(){

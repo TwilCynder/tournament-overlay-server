@@ -61,7 +61,6 @@ function runAsyncTask(ws, f){
 
 /** @param {string?} slug @param {ReturnType<import("./dataManager.js").DataManager['tryGetData']>} data   @returns {import("./wsProtocol").Status}*/
 function getStatus(slug, data){
-    console.log(slug, data)
     if (!slug) return {mode: "nothing-loaded"};
 
     return data ?
@@ -105,7 +104,11 @@ export function initWS(wss, dataManager){
                         break;
                     case "build-data":
                         runAsyncTask(ws, async () => {
-                            await dataManager.build({slow_mode: !msg.fast_mode});
+                            if (msg.sggog_addr){
+                                const result = await dataManager.reinitSGGAPI(msg.sggog_addr);
+                                sendOperationFeedback(ws, "ok", result);
+                            }
+                            await dataManager.build(msg.fast_mode);
                             sendOperationFeedback(ws, "success");
                         });
                         break;

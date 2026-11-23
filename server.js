@@ -16,8 +16,8 @@ let {event, load, port, sggog_addr, sggog_addr_default, slow_mode} = new Argumen
     .enableHelpParameter()
     .parseProcessArguments()
 
-const dm = new DataManager({sggog_addr: getSggogAddress(sggog_addr, sggog_addr_default), slow_mode});
-
+const dm = new DataManager();
+await dm.initSGGAPI(getSggogAddress(sggog_addr, sggog_addr_default));
 
 if (event || load){
     dm.load(event);
