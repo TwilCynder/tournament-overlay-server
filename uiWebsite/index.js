@@ -1,5 +1,6 @@
 import { ContentSwitcher, showElement } from "./src/DOMUtil.js";
 import { sendJSON } from "./src/WSUtil.js";
+import { OperationManager } from "./src/operationManager.js";
 
 /**
  * @typedef {import("../src/server/wsProtocol.js").WSControlMessageIncoming} WSCommand
@@ -21,34 +22,39 @@ const feedbackElement = document.getElementById("feedback");
 
 const contentSwitcher = new ContentSwitcher(document.querySelector(".panel.initial")); 
 
-/**
- * @typedef {{name: string, body: (...args) => WSCommand}} Operation
- * type {{[name: string]: Operation}}
- */
-const operations = {
+export const operations = {
     loadEventFromTSH: {name: "Load event from TSH", body: () => ({op: "load-data", url: null})},
     unloadEvent: {name: "Unselect event", body: () => ({op: "reset"})},
     buildData: {name: "Build data", body: (fast_mode, sggog_addr) => ({op: "build-data", sggog_addr, fast_mode})}
 }
 
-/** @type {Operation?} */
-let lastOperation = null;
+let currentOperation = new OperationManager;
 
 /** @param {string} cssClass @param {string} message  */
 function setFeedbackContent(message, cssClass = ""){
-    feedbackElement.innerHTML = `<span class="${cssClass}">${lastOperation.name} - ${message}</span>`;
+    feedbackElement.innerHTML = `<span class="${cssClass}">${message}</span>`;
 }
 
-/** @param {WSFeedbackMessage} res  */
-function processFeedbackResponse(res){
-    switch (res.status){
+/** @param {WSFeedbackMessage} feedback  */
+function processFeedbackResponse(feedback){
+    let cssClass = "";
+    switch (feedback.status){
         case "error": 
-            return [res.message ?? "Error", "error-message"];
-        case "ok":
-            return [res.message ?? "Server processing request ..."];
+            cssClass = "error-message";
+            currentOperation.setStatus(feedback.message ?? "Error");
+            break;
+        case "status":
+            currentOperation.setStatus(feedback.message ?? "Server processing request ...");
+            break;
+        case "info":
+            if (feedback.message) currentOperation.addLog(feedback.message);
+            break;
         case "success":
-            return [res.message ?? "Success", "success-message"];
+            cssClass = "success-message";
+            currentOperation.setStatus(feedback.message ?? "Success");
+            break;
     }
+    return [currentOperation.getStatusHTML(), cssClass];
 }
 
 /** @param {WSStatusMessage} message */
@@ -58,7 +64,6 @@ function processStatusMessage(message){
             contentSwitcher.showElement(PANELS.nothingLoaded);
             statusElement.innerHTML = "No event selected";
             break;
-
         case "event-set":
             contentSwitcher.showElement(PANELS.eventSelected);
             statusElement.innerHTML = `Event selected : ${message.slug} <br> No data loaded`;
@@ -89,7 +94,7 @@ ws.addEventListener("message", (event) => {
 /** @param {WSCommand} obj @param {Operation} op @param {...any} args  */
 function sendCommand(ws, op, ...args){
     sendJSON(ws, op.body(...args));
-    lastOperation = op;
+    currentOperation.startOperation(op);
     setFeedbackContent("Waiting for server response ...");
 }
 

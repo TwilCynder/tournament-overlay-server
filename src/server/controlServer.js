@@ -55,7 +55,7 @@ function handleAsyncTask(ws, promise){
 
 /** @param {WebSocket} ws @param {() => Promise<unknown>} f  */
 function runAsyncTask(ws, f){
-    sendOperationFeedback(ws, "ok");
+    sendOperationFeedback(ws, "status");
     return handleAsyncTask(ws, f());
 }
 
@@ -106,7 +106,7 @@ export function initWS(wss, dataManager){
                         runAsyncTask(ws, async () => {
                             if (msg.sggog_addr){
                                 const result = await dataManager.reinitSGGAPI(msg.sggog_addr);
-                                sendOperationFeedback(ws, "ok", result);
+                                sendOperationFeedback(ws, "info", result);
                             }
                             await dataManager.build(msg.fast_mode);
                             sendOperationFeedback(ws, "success");

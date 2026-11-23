@@ -4,7 +4,7 @@ export type WSControlMessageIncoming =
     {op: "build-data", sggog_addr: string?, fast_mode: boolean?} |
     {op: "reset"}
 
-export type OperationFeedbackStatus = "error" | "ok" | "success";
+export type OperationFeedbackStatus = "error" | "status" | "info" | "success";
 export type OperationFeedback = {type: "operation-feedback", status: OperationFeedbackStatus, message?: string}
 export type Status = 
     {mode: "nothing-loaded"} |
