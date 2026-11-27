@@ -7,13 +7,23 @@ import { playerString } from "./findPlayer.js";
 import { getEventFromTSH } from "../common/getEventFromTSH.js";
 import { EventEmitter } from "events"
 import { build } from "../build/build.js";
-import { defaults } from "../common/jsUtil.js";
 import { APIManager } from "./util/APIManager.js";
 
 export class ServerStateError extends HTTPServerError {
     constructor(cause, userMesssage, ...msg){
         super(500, cause, "This operation cannot be done in this state : " + userMesssage, ...msg);
     }
+}
+
+/** @param {string?} message  */
+function result(message){
+    if (message) console.log(message);
+    return {message};
+}
+
+/** @typedef {ReturnType<result>} DMOperationResult */
+export class ProgressReporter {
+    report(){}; //ABSTRACT //I WISH I WAS DOING JAVA //OR TYPESCRIPT
 }
 
 export class DataManager extends EventEmitter {
@@ -79,8 +89,7 @@ export class DataManager extends EventEmitter {
     /** @param {string} sggog_addr  */
     async reinitSGGAPI(sggog_addr){
         const resMsg = await this.#apiManager.reinitClient(sggog_addr);
-        console.log(resMsg);
-        return resMsg;
+        return result(true, resMsg);
     }
 
     /** @param {boolean} fast_mode */
@@ -90,10 +99,11 @@ export class DataManager extends EventEmitter {
         const limiter = this.#apiManager.getLimiter();
         const client = this.#apiManager.getClient();
 
-        return build(client, this.#event, limiter, {slow_mode: !fast_mode}).then((result) => {
+        const result = build(client, this.#event, limiter, {slow_mode: !fast_mode}).then((result) => {
             this.#onDataChanged();
             return result;
         });
+
     }
 
     /**
@@ -139,7 +149,7 @@ export class DataManager extends EventEmitter {
     }
 
     /**
-     * @typedef {import("./types").PlayerHandle} Player
+     * @typedef {import("./dataTypes.js").PlayerHandle} Player
      * @param {Player} p1 
      * @param {Player} p2 
      */

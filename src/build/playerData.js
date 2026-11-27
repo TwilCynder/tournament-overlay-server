@@ -9,11 +9,11 @@ export async function getPlayersDataFactory(queryManager = new QueryManager){
      * @param {import("graphql-request").GraphQLClient} client 
      * @param {import("../common/types").PlayerObject[]} players 
      * @param {import("startgg-helper-node").TimedQuerySemaphore} limiter 
-     * @param {{slowMode: boolean}} config
+     * @param {{slow_mode: boolean}} config
      */
     return async function getPlayersData(client, players, limiter, config){
         
-        if (config.slowMode){
+        if (config.slow_mode){
             let result = [];
             let count = 0;
             for (const player of players){

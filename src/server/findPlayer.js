@@ -2,7 +2,7 @@ import { fmtS, NoCauseFormattableError } from "../common/error.js";
 import { HTTPServerError } from "./serverError.js";
 
 /**
- * @param {import("./types.js").PlayerHandle} handle 
+ * @param {import("./dataTypes.js").PlayerHandle} handle 
  * @param {import("../common/types.js").PlayerObject[]} players 
  */
 export function findPlayerID(handle, players){
@@ -18,7 +18,7 @@ export function findPlayerID(handle, players){
     throw new HTTPServerError(404, null, "Player not found :", handle.name);
 }
 
-/** @param {import("./types.js").PlayerHandle} player */
+/** @param {import("./dataTypes.js").PlayerHandle} player */
 export function playerString(id, player){
     console.log(player)
     return player.name ? `${player.name} (${id})` : "id "+ id;

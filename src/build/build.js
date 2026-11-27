@@ -13,6 +13,7 @@ import { durationString } from "./util/timeString.js";
  * @param {boolean} config.slow_mode Send only one request at a time 
  */
 export async function build(client, eventSlug, limiter, config){
+
     const qm = new QueryManager;
     const [getEventInfo, getPlayersData] = await Promise.all([
         getEventInfoFactory(qm),
